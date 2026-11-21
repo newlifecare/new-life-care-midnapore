@@ -4,25 +4,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   CalendarDays,
   ArrowRight,
-  ShieldCheck,
-  Clock,
   Activity,
-  Phone,
   CheckCircle2,
   Stethoscope,
-  Microscope,
   Award,
   Sparkles,
   ChevronRight,
   ChevronLeft,
-  Flame,
-  Wind,
-  HeartPulse,
   Building2,
-  Check,
   Star,
-  Zap,
+  Images,
+  Maximize2,
 } from 'lucide-react'
+import { getGallery } from '../services/api'
 
 // Institutional affiliations from the official flyers
 const INSTITUTES = [
@@ -50,92 +44,87 @@ const ROTATING_SPECIALTIES = [
   { title: 'General & Laparoscopic Surgery', doctor: 'Dr. Biswajit Panda (MS Laparoscopic)', color: 'text-sky-300' },
 ]
 
-const SPOTLIGHT_DOCTORS = [
+// Default verified clinic, lab & doctor photos for the Hero Gallery slider
+const DEFAULT_HERO_GALLERY = [
   {
-    name: 'Dr. S. K. Das',
-    spec: 'Orthopedics & Joint Surgery',
-    degree: 'MS (Ortho), (AIIMS) New Delhi',
-    focus: 'Arthroscopy, Micro Surgery, Trauma & Spine Surgery',
-    image: '/images/doctors/dr-sk-das.jpg',
-    tag: 'AIIMS New Delhi',
-    tagColor: 'bg-amber-500/20 text-amber-200 border-amber-400/30',
+    title: 'NABL Accredited Pathology Laboratory Floor',
+    description: 'Fully computerized floor featuring automated chemistry analyzers, digital microscopes, and neuro-diagnostics setup.',
+    category: 'Lab Equipment',
+    imageUrl: '/images/lab-interior-ncv-eeg.jpg',
   },
   {
-    name: 'Dr. Niket Arora',
-    spec: 'Cardiothoracic & Vascular Surgery',
-    degree: 'MBBS, DNB (Cardio Thoracic Surgery)',
-    focus: 'Heart & Vascular Surgery, Member EACTS & IACTS',
-    image: '/images/doctors/dr-niket-arora.jpg',
-    tag: 'Manipal Hospitals',
-    tagColor: 'bg-rose-500/20 text-rose-200 border-rose-400/30',
+    title: 'Automated Biochemistry & Cell Counter Analyzers',
+    description: 'High-throughput AutoQuant analyzer and computerized 5-part hematology cell counter for precision blood diagnostics.',
+    category: 'Diagnostic Suite',
+    imageUrl: '/images/lab-packages-equipment.jpg',
   },
   {
-    name: 'Dr. Panchanan Panigrahi',
-    spec: 'Surgical Gastroenterology & GI Surgery',
-    degree: 'MCH Surgical Gastroenterology (BHU), FIAGES',
-    focus: 'Advanced Endo, Laser, Laparoscopic & GI Surgery',
-    image: '/images/doctors/dr-panchanan-panigrahi.jpg',
-    tag: 'BHU Varanasi',
-    tagColor: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30',
+    title: 'Diagnostic Testing Station & Oxygen Support',
+    description: 'Specialized testing bay with computerized ECG, 24-hr Holter, PFT, EEG and emergency oxygen cylinders available 24/7.',
+    category: 'Facilities',
+    imageUrl: '/images/lab-equipment-oxygen.jpg',
   },
   {
-    name: 'Dr. Ayesha Sultana',
-    spec: 'Gynecology & Obstetrics',
-    degree: 'MBBS, MS (G&O), DNB, MRCOG (London)',
-    focus: 'High-Risk Pregnancy, Menstrual Care & Women’s Health',
-    image: '/images/doctors/dr-ayesha-sultana.jpg',
-    tag: 'MRCOG London',
-    tagColor: 'bg-pink-500/20 text-pink-200 border-pink-400/30',
+    title: 'New Life Care Diagnostic Centre — Midnapore',
+    description: 'NABL M(EL)T Accredited & ISO 9001:2015 Certified diagnostic facility situated in Keranitola, Midnapore Town.',
+    category: 'Centre Facility',
+    imageUrl: '/images/banner-main.jpg',
   },
   {
-    name: 'Dr. Archisman Haldar',
-    spec: 'Neurology & Brain Care',
-    degree: 'MBBS (AIIMS), MD (AIIMS Delhi), DM (AIIMS)',
-    focus: 'Seizures, Epilepsy, Stroke, Migraines & Neuropathies',
-    image: '/images/doctors/dr-archisman-haldar.jpg',
-    tag: 'AIIMS Delhi / BBSR',
-    tagColor: 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30',
+    title: 'Visiting Specialist Physicians & Surgeon Panel',
+    description: 'Official panel of 19 experienced specialist doctors across cardiology, neurology, gastroenterology, orthopedics, and surgery.',
+    category: 'Specialist Panel',
+    imageUrl: '/images/poster-visiting-doctors.jpg',
   },
   {
-    name: 'Dr. Samujjwal Das',
-    spec: 'Head & Neck Oncosurgery',
-    degree: 'MBBS, MDS (Oral & Maxillofacial Surgery)',
-    focus: 'Oral, Facial, Mouth & Neck Tumor Treatment',
-    image: '/images/doctors/dr-samujjwal-das.jpg',
-    tag: 'Desun Hospital',
-    tagColor: 'bg-indigo-500/20 text-indigo-200 border-indigo-400/30',
+    title: 'Orthopedic & Joint Surgery — Dr. S. K. Das',
+    description: 'AIIMS New Delhi trained orthopedic surgeon specializing in arthroscopy, trauma care, and spine procedures.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-sk-das.jpg',
   },
   {
-    name: 'Dr. Biswajit Panda',
-    spec: 'General & Laparoscopic Surgery',
-    degree: 'MBBS, MS (General Laparoscopic Surgeon)',
-    focus: 'Hernia, Gallbladder Stones & Minimally Invasive Surgery',
-    image: '/images/doctors/dr-biswajit-panda.jpg',
-    tag: 'Laparoscopic OT',
-    tagColor: 'bg-sky-500/20 text-sky-200 border-sky-400/30',
+    title: 'Cardiothoracic Surgery — Dr. Niket Arora',
+    description: 'Senior Consultant from Manipal Hospitals for advanced cardiovascular and thoracic surgical advisories.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-niket-arora.jpg',
   },
-]
-
-const LAB_CAPABILITIES = [
-  { name: 'Hematology AutoQuant', status: 'Active 24/7', load: 98, color: 'emerald' },
-  { name: 'Computerized 12-Lead ECG', status: 'Instant Report', load: 100, color: 'sky' },
-  { name: 'Digital EEG & NCV Testing', status: 'Ready on Demand', load: 92, color: 'indigo' },
-  { name: '24-Hour Holter Monitoring', status: 'Ambulatory Active', load: 95, color: 'purple' },
-  { name: 'Upper GI Video Endoscopy', status: 'Procedure Bay Ready', load: 90, color: 'amber' },
-  { name: 'Emergency Oxygen Cylinders', status: 'Available in Stock', load: 100, color: 'emerald' },
-]
-
-const QUICK_PACKAGES = [
-  { name: 'Health Checkup', count: '47 Tests', price: '₹1,350', old: '₹2,200', tag: 'Most Popular', color: 'sky' },
-  { name: 'Advanced Health Checkup', count: '12 Tests', price: '₹1,999', old: '₹3,200', tag: 'Full Body', color: 'emerald' },
-  { name: 'Diabetic Profile', count: '59 Tests', price: '₹2,999', old: '₹4,500', tag: 'Specialist Care', color: 'purple' },
-  { name: 'Cancer Marker Profile', count: '7 Tests', price: '₹2,999', old: '₹5,000', tag: 'Biomarkers', color: 'rose' },
+  {
+    title: 'Surgical Gastroenterology — Dr. Panchanan Panigrahi',
+    description: 'BHU trained GI, laser, endo, and laparoscopic surgery consultant.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-panchanan-panigrahi.jpg',
+  },
+  {
+    title: 'Gynecology & High-Risk Pregnancy — Dr. Ayesha Sultana',
+    description: 'MRCOG London and DNB specialist providing comprehensive women healthcare and maternity advisory.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-ayesha-sultana.jpg',
+  },
+  {
+    title: 'Neurology & Brain Diagnostics — Dr. Archisman Haldar',
+    description: 'AIIMS Delhi neurology specialist for epilepsy, stroke, migraine, and neuropathy evaluations.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-archisman-haldar.jpg',
+  },
+  {
+    title: 'Head & Neck Oncosurgery — Dr. Samujjwal Das',
+    description: 'Desun Hospital specialist for maxillofacial, oral, and head & neck tumor evaluations.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-samujjwal-das.jpg',
+  },
+  {
+    title: 'Laparoscopic Surgery — Dr. Biswajit Panda',
+    description: 'Minimally invasive laparoscopic surgeon for gallbladder, hernia, and abdominal procedures.',
+    category: 'Specialists',
+    imageUrl: '/images/doctors/dr-biswajit-panda.jpg',
+  },
 ]
 
 export default function HeroSection() {
   const [specialtyIdx, setSpecialtyIdx] = useState(0)
-  const [activeTab, setActiveTab] = useState('doctors') // 'doctors' | 'lab' | 'packages'
-  const [doctorIdx, setDoctorIdx] = useState(0)
+  const [galleryItems, setGalleryItems] = useState(DEFAULT_HERO_GALLERY)
+  const [slideIdx, setSlideIdx] = useState(0)
+  const [direction, setDirection] = useState(1)
   const [isPaused, setIsPaused] = useState(false)
 
   // Rotating specialty words every 3.5s
@@ -146,17 +135,72 @@ export default function HeroSection() {
     return () => clearInterval(timer)
   }, [])
 
-  // Auto-cycling spotlight doctors if not hovered/paused
+  // Fetch real gallery items from backend API
   useEffect(() => {
-    if (activeTab !== 'doctors' || isPaused) return
+    const loadGallery = async () => {
+      try {
+        const data = await getGallery()
+        if (Array.isArray(data) && data.length > 0) {
+          const valid = data.filter((item) => item.imageUrl)
+          if (valid.length > 0) {
+            setGalleryItems(valid)
+          }
+        }
+      } catch (_) {}
+    }
+    loadGallery()
+  }, [])
+
+  // Auto-switch photo every 5 seconds (5000ms)
+  useEffect(() => {
+    if (isPaused || galleryItems.length <= 1) return
     const timer = setInterval(() => {
-      setDoctorIdx((prev) => (prev + 1) % SPOTLIGHT_DOCTORS.length)
-    }, 4500)
+      setDirection(1)
+      setSlideIdx((prev) => (prev + 1) % galleryItems.length)
+    }, 5000)
     return () => clearInterval(timer)
-  }, [activeTab, isPaused])
+  }, [isPaused, galleryItems.length])
+
+  const handleNext = () => {
+    setDirection(1)
+    setSlideIdx((prev) => (prev + 1) % galleryItems.length)
+  }
+
+  const handlePrev = () => {
+    setDirection(-1)
+    setSlideIdx((prev) => (prev === 0 ? galleryItems.length - 1 : prev - 1))
+  }
+
+  const slideVariants = {
+    enter: (dir) => ({
+      x: dir > 0 ? '100%' : '-100%',
+      opacity: 0,
+      scale: 0.96,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        x: { type: 'spring', stiffness: 280, damping: 28 },
+        opacity: { duration: 0.35 },
+        scale: { duration: 0.35 },
+      },
+    },
+    exit: (dir) => ({
+      x: dir > 0 ? '-100%' : '100%',
+      opacity: 0,
+      scale: 0.96,
+      transition: {
+        x: { type: 'spring', stiffness: 280, damping: 28 },
+        opacity: { duration: 0.25 },
+        scale: { duration: 0.25 },
+      },
+    }),
+  }
 
   const curSpec = ROTATING_SPECIALTIES[specialtyIdx]
-  const curDoctor = SPOTLIGHT_DOCTORS[doctorIdx]
+  const curSlide = galleryItems[slideIdx] || galleryItems[0]
 
   return (
     <section className="relative bg-gradient-to-br from-slate-950 via-sky-950 to-slate-900 text-white overflow-hidden min-h-screen flex flex-col justify-between pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-12">
@@ -339,280 +383,162 @@ export default function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right Column: Multi-View Interactive Showcase Card */}
+          {/* Right Column: Gallery Section (Only the Gallery) */}
           <div className="lg:col-span-5 flex justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, x: 40 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="w-full max-w-lg bg-gradient-to-b from-white/15 to-white/5 border border-white/20 rounded-3xl p-5 sm:p-6 backdrop-blur-2xl shadow-2xl relative"
+              className="w-full max-w-lg bg-gradient-to-b from-white/15 to-white/5 border border-white/20 rounded-3xl p-5 sm:p-6 backdrop-blur-2xl shadow-2xl relative flex flex-col justify-between"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {/* Card Header & Tabs */}
-              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
-                <div className="flex items-center gap-1.5 p-1 bg-black/30 rounded-xl border border-white/10">
-                  <button
-                    onClick={() => setActiveTab('doctors')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'doctors'
-                        ? 'bg-sky-500 text-white shadow-md'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Doctors
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('lab')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'lab'
-                        ? 'bg-sky-500 text-white shadow-md'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Lab & OT
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('packages')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'packages'
-                        ? 'bg-sky-500 text-white shadow-md'
-                        : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    Packages
-                  </button>
+              {/* Gallery Header */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-white/10 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center shadow-inner">
+                    <Images size={16} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Diagnostic & Lab Gallery
+                      </span>
+                      <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 block leading-tight">
+                      Photo Tour • Switches every 5 seconds
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="flex h-2.5 w-2.5 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
-                    Open Now
+                  <span className="text-xs font-mono font-bold text-sky-200 bg-black/40 px-2.5 py-1 rounded-lg border border-white/10">
+                    {String(slideIdx + 1).padStart(2, '0')} / {String(galleryItems.length).padStart(2, '0')}
                   </span>
                 </div>
               </div>
 
-              {/* Tab 1: Doctors Spotlight */}
-              {activeTab === 'doctors' && (
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-sky-300 font-bold uppercase tracking-wider flex items-center gap-1">
-                      <Sparkles size={13} />
-                      Featured Specialist ({doctorIdx + 1}/{SPOTLIGHT_DOCTORS.length})
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() =>
-                          setDoctorIdx((prev) => (prev === 0 ? SPOTLIGHT_DOCTORS.length - 1 : prev - 1))
-                        }
-                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-                        aria-label="Previous doctor"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setDoctorIdx((prev) => (prev + 1) % SPOTLIGHT_DOCTORS.length)
-                        }
-                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-                        aria-label="Next doctor"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <AnimatePresence mode="wait">
+              {/* Sliding Photo Viewport (Linked directly to /gallery) */}
+              <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-slate-900 shadow-xl group">
+                <Link
+                  to="/gallery"
+                  className="block relative h-64 sm:h-72 md:h-80 w-full overflow-hidden cursor-pointer select-none"
+                  title="Click to explore the Full Gallery"
+                >
+                  <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
-                      key={curDoctor.name}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.3 }}
-                      className="bg-slate-900/60 border border-white/15 rounded-2xl p-4 relative overflow-hidden"
+                      key={slideIdx}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      className="absolute inset-0 w-full h-full"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="relative shrink-0">
-                          <img
-                            src={curDoctor.image}
-                            alt={curDoctor.name}
-                            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-white/30 shadow-lg"
-                          />
-                          <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1 shadow-md">
-                            <Check size={12} strokeWidth={3} />
-                          </div>
-                        </div>
+                      <img
+                        src={curSlide.imageUrl}
+                        alt={curSlide.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
 
-                        <div className="flex-1 min-w-0">
-                          <span
-                            className={`inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full border mb-1.5 ${curDoctor.tagColor}`}
-                          >
-                            {curDoctor.tag}
-                          </span>
-                          <h3 className="text-base sm:text-lg font-bold text-white truncate">
-                            {curDoctor.name}
-                          </h3>
-                          <p className="text-xs text-cyan-300 font-semibold truncate">
-                            {curDoctor.spec}
-                          </p>
-                          <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
-                            {curDoctor.degree}
-                          </p>
-                        </div>
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-950/75 text-cyan-300 border border-white/20 backdrop-blur-md shadow-md">
+                          <Sparkles size={11} className="text-cyan-400" />
+                          {curSlide.category || 'Diagnostic Centre'}
+                        </span>
+
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/20 text-white backdrop-blur-md border border-white/20 group-hover:bg-sky-500 transition-colors">
+                          <Maximize2 size={11} />
+                          <span>View Gallery</span>
+                        </span>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-white/10">
-                        <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
-                          🎯 {curDoctor.focus}
-                        </p>
-                      </div>
-
-                      <div className="mt-4 flex items-center gap-2">
-                        <Link
-                          to={`/book-consultation?doctor=${encodeURIComponent(curDoctor.name)}&department=${encodeURIComponent(curDoctor.spec)}`}
-                          className="flex-1 text-center py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
-                        >
-                          <CalendarDays size={14} />
-                          <span>Book Consultation</span>
-                        </Link>
-                        <Link
-                          to="/doctors"
-                          className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition-all"
-                        >
-                          View Bio
-                        </Link>
+                      {/* Bottom Caption Overlay */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pt-12 pb-3.5 px-4 sm:px-5 pointer-events-none">
+                        <h3 className="text-white font-bold text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-sky-300 transition-colors">
+                          {curSlide.title}
+                        </h3>
+                        {curSlide.description && (
+                          <p className="text-slate-300 text-xs mt-1 line-clamp-2 leading-relaxed">
+                            {curSlide.description}
+                          </p>
+                        )}
                       </div>
                     </motion.div>
                   </AnimatePresence>
 
-                  {/* Doctor Thumbnail Nav */}
-                  <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
-                    {SPOTLIGHT_DOCTORS.map((doc, idx) => (
-                      <button
-                        key={doc.name}
-                        onClick={() => setDoctorIdx(idx)}
-                        className={`relative w-9 h-9 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                          idx === doctorIdx
-                            ? 'border-sky-400 scale-105 shadow-md shadow-sky-400/30'
-                            : 'border-white/20 opacity-60 hover:opacity-100'
-                        }`}
-                        title={doc.name}
-                      >
-                        <img src={doc.image} alt={doc.name} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: Lab & Testing Equipment */}
-              {activeTab === 'lab' && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="relative rounded-2xl overflow-hidden mb-4 border border-white/20 h-36">
-                    <img
-                      src="/images/lab-interior-ncv-eeg.jpg"
-                      alt="NABL Accredited Pathology Laboratory Floor"
-                      className="w-full h-full object-cover"
+                  {/* 5-Second Animated Progress Bar */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 z-20 overflow-hidden">
+                    <motion.div
+                      key={slideIdx}
+                      initial={{ width: '0%' }}
+                      animate={{ width: isPaused ? '0%' : '100%' }}
+                      transition={{ duration: 5, ease: 'linear' }}
+                      className="h-full bg-gradient-to-r from-sky-400 to-cyan-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex items-end p-3.5">
-                      <div>
-                        <span className="text-[10px] font-extrabold bg-sky-500 text-white px-2 py-0.5 rounded-full uppercase">
-                          NABL M(EL)T Certified
-                        </span>
-                        <p className="text-sm font-bold text-white mt-1">
-                          Automated Biochemistry & Neurological Lab Setup
-                        </p>
-                      </div>
-                    </div>
                   </div>
+                </Link>
+              </div>
 
-                  <div className="space-y-2">
-                    {LAB_CAPABILITIES.map((cap) => (
-                      <div
-                        key={cap.name}
-                        className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full bg-${cap.color}-400`} />
-                          <span className="text-slate-200 font-semibold">{cap.name}</span>
-                        </div>
-                        <span className="text-[11px] font-bold text-cyan-300">{cap.status}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Tab 3: Diagnostic Packages */}
-              {activeTab === 'packages' && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-2.5"
-                >
-                  {QUICK_PACKAGES.map((pkg) => (
-                    <div
-                      key={pkg.name}
-                      className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-3 hover:border-sky-400/40 transition-all"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-xs sm:text-sm">{pkg.name}</span>
-                          <span className="text-[10px] font-bold bg-white/10 text-cyan-300 px-2 py-0.5 rounded-md">
-                            {pkg.count}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400">{pkg.tag}</span>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-slate-400 line-through text-[11px]">{pkg.old}</span>
-                          <span className="text-sm sm:text-base font-extrabold text-emerald-400">{pkg.price}</span>
-                        </div>
-                        <Link
-                          to="/book-collection"
-                          className="inline-block text-[10px] font-bold text-sky-400 hover:text-sky-300 underline mt-0.5"
-                        >
-                          Book Home Pickup →
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-
-              {/* Emergency Hotline Banner inside Card */}
-              <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between text-xs">
+              {/* Bottom Arrows & Gallery Actions (As Requested) */}
+              <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between gap-3">
+                {/* Arrow Controls at the Bottom */}
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
-                    <Phone size={14} />
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 block leading-tight">24/7 Helpline</span>
-                    <a href="tel:09733525031" className="text-white font-bold hover:text-sky-300 transition-colors">
-                      097335 25031 / 9647393949
-                    </a>
+                  <button
+                    onClick={handlePrev}
+                    aria-label="Previous photo"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-sky-500 text-white border border-white/15 hover:border-sky-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-md"
+                    title="Previous photo"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    aria-label="Next photo"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-sky-500 text-white border border-white/15 hover:border-sky-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-md"
+                    title="Next photo"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+
+                  {/* Dot / Slide indicators */}
+                  <div className="hidden xs:flex items-center gap-1.5 ml-2">
+                    {galleryItems.slice(0, 6).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setDirection(idx > slideIdx ? 1 : -1)
+                          setSlideIdx(idx)
+                        }}
+                        className={`h-2 rounded-full transition-all cursor-pointer ${
+                          idx === slideIdx % 6
+                            ? 'w-6 bg-sky-400'
+                            : 'w-2 bg-white/20 hover:bg-white/40'
+                        }`}
+                        aria-label={`Slide ${idx + 1}`}
+                      />
+                    ))}
+                    {galleryItems.length > 6 && (
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        +{galleryItems.length - 6}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <a
-                  href="https://wa.me/919733525031"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition-all shadow-md flex items-center gap-1"
+                {/* Direct Link to Gallery Section */}
+                <Link
+                  to="/gallery"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs sm:text-sm font-bold shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all active:scale-95"
                 >
-                  <span>WhatsApp</span>
-                  <ArrowRight size={12} />
-                </a>
+                  <span>Open Gallery</span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             </motion.div>
           </div>
