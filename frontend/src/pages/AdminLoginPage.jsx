@@ -56,14 +56,18 @@ export default function AdminLoginPage() {
         <div className="w-full max-w-md">
           {/* Brand header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-600/30 mb-4">
-              <HeartPulse className="w-8 h-8" />
+            <div className="inline-flex items-center justify-center mb-4">
+              <img
+                src="/images/logo.jpg"
+                alt="New Life Care Diagnostic Centre Logo"
+                className="w-20 h-20 rounded-full border-2 border-slate-200 shadow-xl object-cover bg-white"
+              />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 font-nunito">
-              Hospital Admin Portal
+              New <span className="text-rose-600">LIFE CARE</span> Admin Portal
             </h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-1">
-              New Life Care Diagnostic Centre & Nursing Home
+              Diagnostic Centre & Medical Laboratory Management
             </p>
           </div>
 

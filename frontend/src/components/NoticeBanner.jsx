@@ -57,7 +57,7 @@ export default function NoticeBanner({ onOpenModal }) {
       aria-label="Important Patient Notice"
       className={`text-white text-xs sm:text-sm py-2 px-3 sm:px-6 relative z-50 transition-colors shadow-sm ${
         isAlert
-          ? 'bg-gradient-to-r from-rose-600 via-red-600 to-amber-700 animate-pulse-slow'
+          ? 'bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 animate-pulse-slow'
           : notice.type === 'camp'
           ? 'bg-gradient-to-r from-emerald-700 via-teal-700 to-sky-800'
           : 'bg-gradient-to-r from-sky-700 via-sky-800 to-indigo-900'
@@ -68,7 +68,7 @@ export default function NoticeBanner({ onOpenModal }) {
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <span className="shrink-0 p-1 bg-white/20 rounded-lg flex items-center justify-center">
             {isAlert ? (
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-200 animate-bounce" />
+              <AlertTriangle className="w-3.5 h-3.5 text-white animate-bounce" />
             ) : (
               <Megaphone className="w-3.5 h-3.5 text-emerald-200" />
             )}
@@ -93,7 +93,7 @@ export default function NoticeBanner({ onOpenModal }) {
           {notice.link && (
             <Link
               to={notice.link}
-              className="inline-flex items-center gap-1 text-xs font-bold text-white underline hover:text-amber-200 shrink-0 ml-1"
+              className="inline-flex items-center gap-1 text-xs font-bold text-white underline hover:text-cyan-200 shrink-0 ml-1"
             >
               Details <ArrowRight className="w-3 h-3" />
             </Link>

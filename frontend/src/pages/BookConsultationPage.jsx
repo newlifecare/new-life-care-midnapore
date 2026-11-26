@@ -394,9 +394,9 @@ function SuccessCard({ bookingId }) {
           <p className="text-sky-700 font-bold text-lg mt-0.5">{bookingId}</p>
         </div>
       )}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left max-w-sm mx-auto">
-        <p className="text-amber-700 text-sm font-semibold mb-1">Important</p>
-        <ul className="text-amber-600 text-sm space-y-1 list-disc list-inside">
+      <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 text-left max-w-sm mx-auto">
+        <p className="text-sky-800 text-sm font-semibold mb-1">Important</p>
+        <ul className="text-sky-700 text-sm space-y-1 list-disc list-inside">
           <li>Please arrive 10 minutes before your slot.</li>
           <li>Carry a valid photo ID and any prior reports.</li>
           <li>For queries, call us at 97335 25031.</li>

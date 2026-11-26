@@ -85,9 +85,9 @@ function SuccessCard({ bookingId }) {
           <p className="text-sky-700 font-bold text-lg mt-0.5">{bookingId}</p>
         </div>
       )}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left max-w-sm mx-auto">
-        <p className="text-amber-700 text-sm font-semibold mb-1">Instructions</p>
-        <ul className="text-amber-600 text-sm space-y-1 list-disc list-inside">
+      <div className="bg-sky-50 border border-sky-200 rounded-xl p-4 text-left max-w-sm mx-auto">
+        <p className="text-sky-800 text-sm font-semibold mb-1">Instructions</p>
+        <ul className="text-sky-700 text-sm space-y-1 list-disc list-inside">
           <li>Please fast for at least 8–10 hours if required.</li>
           <li>Keep your Aadhaar/ID ready for verification.</li>
           <li>Our team will call you 30 minutes before arrival.</li>

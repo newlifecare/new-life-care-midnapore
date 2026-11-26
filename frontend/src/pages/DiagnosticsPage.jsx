@@ -32,7 +32,7 @@ const CATEGORY_BADGE_COLORS = {
   Pathology: 'bg-purple-100 text-purple-700',
   USG: 'bg-blue-100 text-blue-700',
   Cardiology: 'bg-red-100 text-red-700',
-  Radiology: 'bg-orange-100 text-orange-700',
+  Radiology: 'bg-indigo-100 text-indigo-700',
   Pulmonology: 'bg-teal-100 text-teal-700',
   default: 'bg-slate-100 text-slate-600',
 };

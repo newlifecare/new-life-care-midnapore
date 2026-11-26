@@ -60,36 +60,43 @@ export default function Navbar() {
         }`}
       >
         {/* Top Info Bar */}
-        <div className="bg-sky-600 text-white text-xs py-1.5 px-4 hidden md:flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            NABL Certified | Best Pathology in Midnapore
-          </span>
+        <div className="bg-slate-900 text-white text-xs py-1.5 px-4 hidden md:flex items-center justify-between border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+              <span className="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              NABL M(EL)T Accredited & ISO 9001:2015 Certified
+            </span>
+            <span className="text-slate-500">•</span>
+            <span className="text-slate-300">Keranitola, Station Road, Midnapore</span>
+          </div>
           <div className="flex items-center gap-4">
-            <a href="tel:9733525031" className="flex items-center gap-1 hover:text-sky-200 transition-colors">
-              <Phone size={12} />
-              9733525031
+            <span className="text-sky-300 font-semibold">24/7 Helpline:</span>
+            <a href="tel:9733525031" className="flex items-center gap-1 text-white hover:text-sky-300 transition-colors font-bold">
+              <Phone size={12} className="text-sky-400" />
+              97335 25031
             </a>
-            <a href="tel:9647393949" className="flex items-center gap-1 hover:text-sky-200 transition-colors">
-              <Phone size={12} />
-              9647393949
+            <a href="tel:9647393949" className="flex items-center gap-1 text-white hover:text-sky-300 transition-colors font-bold">
+              <Phone size={12} className="text-sky-400" />
+              96473 93949
             </a>
           </div>
         </div>
 
         {/* Main nav */}
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-18">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="bg-sky-500 text-white p-2 rounded-xl group-hover:bg-sky-600 transition-colors shadow-sm">
-                <HeartPulse size={22} />
-              </div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img
+                src="/images/logo.jpg"
+                alt="New Life Care Diagnostic Centre Logo"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-slate-200 shadow-sm group-hover:scale-105 transition-transform bg-white"
+              />
               <div className="leading-tight">
-                <span className="font-bold text-sky-700 text-lg font-nunito block leading-none">
-                  New Life Care
+                <span className="font-extrabold text-slate-900 text-base sm:text-lg font-nunito block leading-tight">
+                  New <span className="text-rose-600">LIFE CARE</span>
                 </span>
-                <span className="text-xs text-slate-500 leading-none">
+                <span className="text-[11px] sm:text-xs font-bold text-sky-600 tracking-wide block leading-none">
                   Diagnostic Centre
                 </span>
               </div>
@@ -103,10 +110,10 @@ export default function Navbar() {
                   to={link.to}
                   end={link.to === '/'}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    `px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                       isActive
-                        ? 'text-sky-600 bg-sky-50 font-semibold'
-                        : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
+                        ? 'text-rose-600 bg-rose-50 font-bold'
+                        : 'text-slate-700 hover:text-rose-600 hover:bg-slate-50'
                     }`
                   }
                 >
@@ -124,7 +131,7 @@ export default function Navbar() {
                 className={`relative p-2.5 rounded-xl border transition-all cursor-pointer ${
                   hasUrgentAlert
                     ? 'bg-rose-50 border-rose-300 text-rose-600 hover:bg-rose-100 animate-pulse'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-sky-600 hover:bg-sky-50'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50'
                 }`}
               >
                 <Bell size={18} />
@@ -141,7 +148,7 @@ export default function Navbar() {
 
               <Link
                 to="/book-consultation"
-                className="hidden sm:inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-sm font-bold px-4 sm:px-5 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-rose-600/20 hover:shadow-lg hover:shadow-rose-600/30 active:scale-95"
               >
                 Book Appointment
               </Link>
@@ -213,7 +220,7 @@ export default function Navbar() {
                   <Link
                     to="/book-consultation"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-center bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 rounded-xl transition-colors"
+                    className="block text-center bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold py-3 rounded-xl transition-colors shadow-md shadow-rose-600/20"
                   >
                     Book Appointment
                   </Link>
@@ -221,13 +228,13 @@ export default function Navbar() {
                 <div className="flex gap-3 pt-1 pb-2">
                   <a
                     href="tel:9733525031"
-                    className="flex-1 text-center text-xs text-sky-600 border border-sky-200 rounded-xl py-2 hover:bg-sky-50 transition-colors"
+                    className="flex-1 text-center text-xs font-bold text-rose-600 border border-rose-200 rounded-xl py-2 hover:bg-rose-50 transition-colors"
                   >
                     📞 9733525031
                   </a>
                   <a
                     href="tel:9647393949"
-                    className="flex-1 text-center text-xs text-sky-600 border border-sky-200 rounded-xl py-2 hover:bg-sky-50 transition-colors"
+                    className="flex-1 text-center text-xs font-bold text-sky-600 border border-sky-200 rounded-xl py-2 hover:bg-sky-50 transition-colors"
                   >
                     📞 9647393949
                   </a>

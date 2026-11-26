@@ -16,11 +16,11 @@ export default function PageHero({
   )
 
   return (
-    <section className="relative bg-gradient-to-br from-sky-600 via-sky-500 to-sky-700 text-white pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16 md:pb-20 overflow-hidden">
-      {/* Decorative circles */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 translate-y-1/2 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
+    <section className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 text-white pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16 md:pb-20 overflow-hidden">
+      {/* Decorative Brand Ambient Glows (Crimson Red & Medical Sky Blue) */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Optional Badge */}

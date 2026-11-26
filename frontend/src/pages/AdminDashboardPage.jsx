@@ -27,6 +27,8 @@ import {
   Shield,
   Save,
   X,
+  Search,
+  ChevronDown,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import PageTransition from '../components/PageTransition'
@@ -68,6 +70,8 @@ export default function AdminDashboardPage() {
   const [notices, setNotices] = useState([])
   const [bookings, setBookings] = useState([])
   const [tests, setTests] = useState([])
+  const [testCategoryFilter, setTestCategoryFilter] = useState('ALL')
+  const [testSearchTerm, setTestSearchTerm] = useState('')
   const [loadingData, setLoadingData] = useState(false)
 
   // Modals & form state
@@ -495,12 +499,18 @@ export default function AdminDashboardPage() {
       <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
         {/* Sidebar */}
         <aside className="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0">
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-5 border-b border-slate-800 flex items-center gap-3">
+            <img
+              src="/images/logo.jpg"
+              alt="Logo"
+              className="w-10 h-10 rounded-full object-cover bg-white border border-white/20 shrink-0"
+            />
             <div>
-              <span className="text-xs uppercase tracking-wider text-sky-400 font-bold block">Hospital Admin</span>
-              <h2 className="text-white font-bold text-lg font-nunito">New Life Care</h2>
+              <span className="text-[10px] uppercase tracking-wider text-sky-400 font-extrabold block">Hospital Admin</span>
+              <h2 className="text-white font-bold text-base font-nunito leading-tight">
+                New <span className="text-rose-400">LIFE CARE</span>
+              </h2>
             </div>
-            <Shield className="w-6 h-6 text-emerald-400" />
           </div>
 
           <nav className="p-4 space-y-1.5 flex-1">
@@ -586,7 +596,7 @@ export default function AdminDashboardPage() {
                   { label: 'Active Doctors', count: stats?.doctors ?? '—', icon: Stethoscope, color: 'text-sky-600', bg: 'bg-sky-50' },
                   { label: 'Gallery Media', count: stats?.gallery ?? '—', icon: Images, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                   { label: 'Live Notices', count: stats?.notices ?? '—', icon: Megaphone, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                  { label: 'Total Bookings', count: stats?.bookings ?? '—', icon: CalendarCheck, color: 'text-amber-600', bg: 'bg-amber-50' },
+                  { label: 'Total Bookings', count: stats?.bookings ?? '—', icon: CalendarCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
                 ].map((stat) => {
                   const Icon = stat.icon
                   return (
@@ -933,7 +943,7 @@ export default function AdminDashboardPage() {
                                     ? 'bg-emerald-100 text-emerald-800'
                                     : b.status === 'completed'
                                     ? 'bg-sky-100 text-sky-800'
-                                    : 'bg-amber-100 text-amber-800'
+                                    : 'bg-rose-100 text-rose-800'
                                 }`}
                               >
                                 {b.status || 'pending'}
@@ -986,6 +996,39 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+              {/* Category Dropdown & Search Toolbar */}
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="relative w-full sm:w-72">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search test name or code..."
+                    value={testSearchTerm}
+                    onChange={(e) => setTestSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                  <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">Category:</label>
+                  <div className="relative">
+                    <select
+                      value={testCategoryFilter}
+                      onChange={(e) => setTestCategoryFilter(e.target.value)}
+                      className="text-xs font-bold bg-slate-50 border border-slate-200 text-slate-800 py-2 pl-3 pr-8 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    >
+                      <option value="ALL">All Categories ({tests.length})</option>
+                      {Array.from(new Set(tests.map((t) => t.category).filter(Boolean))).map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat} ({tests.filter((t) => t.category === cat).length})
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
@@ -1001,34 +1044,44 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {tests.map((t) => (
-                        <tr key={t.id || t._id} className="hover:bg-slate-50/50">
-                          <td className="px-6 py-4 font-mono text-xs text-slate-500">{t.testCode || t.id}</td>
-                          <td className="px-6 py-4 font-bold text-slate-800">{t.name}</td>
-                          <td className="px-6 py-4">
-                            <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">
-                              {t.category}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 font-bold text-sky-600">₹{t.price}</td>
-                          <td className="px-6 py-4 text-xs text-slate-500">{t.turnaround}</td>
-                          <td className="px-6 py-4 text-xs text-slate-500">{t.sampleType || 'Blood'}</td>
-                          <td className="px-6 py-4 text-right space-x-2">
-                            <button
-                              onClick={() => handleOpenTestModal(t)}
-                              className="p-1.5 text-slate-600 hover:text-sky-600 rounded cursor-pointer"
-                            >
-                              <Edit className="w-4 h-4 inline" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteTest(t._id || t.id)}
-                              className="p-1.5 text-slate-600 hover:text-rose-600 rounded cursor-pointer"
-                            >
-                              <Trash2 className="w-4 h-4 inline" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {tests
+                        .filter((t) => {
+                          const matchesCat =
+                            testCategoryFilter === 'ALL' || t.category === testCategoryFilter
+                          const matchesSearch =
+                            !testSearchTerm ||
+                            t.name?.toLowerCase().includes(testSearchTerm.toLowerCase()) ||
+                            t.testCode?.toLowerCase().includes(testSearchTerm.toLowerCase())
+                          return matchesCat && matchesSearch
+                        })
+                        .map((t) => (
+                          <tr key={t.id || t._id} className="hover:bg-slate-50/50">
+                            <td className="px-6 py-4 font-mono text-xs text-slate-500">{t.testCode || t.id}</td>
+                            <td className="px-6 py-4 font-bold text-slate-800">{t.name}</td>
+                            <td className="px-6 py-4">
+                              <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">
+                                {t.category}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 font-bold text-sky-600">₹{t.price}</td>
+                            <td className="px-6 py-4 text-xs text-slate-500">{t.turnaround}</td>
+                            <td className="px-6 py-4 text-xs text-slate-500">{t.sampleType || 'Blood'}</td>
+                            <td className="px-6 py-4 text-right space-x-2">
+                              <button
+                                onClick={() => handleOpenTestModal(t)}
+                                className="p-1.5 text-slate-600 hover:text-sky-600 rounded cursor-pointer"
+                              >
+                                <Edit className="w-4 h-4 inline" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTest(t._id || t.id)}
+                                className="p-1.5 text-slate-600 hover:text-rose-600 rounded cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4 inline" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>

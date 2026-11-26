@@ -32,31 +32,32 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand column */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-sky-500 text-white p-2 rounded-xl">
-                <HeartPulse size={22} />
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src="/images/logo.jpg"
+                alt="New Life Care Diagnostic Centre Logo"
+                className="w-12 h-12 rounded-full border border-white/20 shadow-md object-cover bg-white"
+              />
               <div className="leading-tight">
-                <span className="font-bold text-white text-lg font-nunito block leading-none">
-                  New Life Care
+                <span className="font-extrabold text-white text-lg font-nunito block leading-none">
+                  New <span className="text-rose-400">LIFE CARE</span>
                 </span>
-                <span className="text-xs text-slate-400 leading-none">
+                <span className="text-xs text-sky-300 font-semibold leading-none">
                   Diagnostic Centre
                 </span>
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-4">
-              Midnapore's most trusted NABL-certified diagnostic centre. Accurate
-              reports, expert doctors, and 24/7 service you can rely on.
+              NABL M(EL)T Accredited & ISO 9001:2015 Certified Diagnostic Laboratory in Keranitola, Midnapore. Accurate pathology, specialized imaging, and 24/7 emergency service.
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="bg-emerald-900/50 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-800">
-                ✓ NABL Certified
+                ✓ NABL Accredited
               </span>
-              <span className="bg-sky-900/50 text-sky-400 text-xs font-semibold px-3 py-1 rounded-full border border-sky-800">
+              <span className="bg-rose-900/50 text-rose-300 text-xs font-semibold px-3 py-1 rounded-full border border-rose-800">
                 ⭐ 4.9 Rating
               </span>
-              <span className="bg-orange-900/50 text-orange-400 text-xs font-semibold px-3 py-1 rounded-full border border-orange-800">
+              <span className="bg-sky-900/50 text-sky-300 text-xs font-semibold px-3 py-1 rounded-full border border-sky-800">
                 🕐 24/7 Open
               </span>
             </div>

@@ -21,7 +21,7 @@ const inputCls = 'w-full border border-slate-200 rounded-xl px-4 py-3 text-sm te
 
 const STATUS_COLOR = {
   ready: 'bg-emerald-100 text-emerald-700',
-  processing: 'bg-amber-100 text-amber-700',
+  processing: 'bg-sky-100 text-sky-700',
   pending: 'bg-slate-100 text-slate-600',
 }
 
@@ -299,7 +299,7 @@ export default function ReportsPage() {
                                                 : row.flag === 'High'
                                                 ? 'bg-red-100 text-red-700'
                                                 : row.flag === 'Low'
-                                                ? 'bg-amber-100 text-amber-700'
+                                                ? 'bg-cyan-100 text-cyan-700'
                                                 : 'bg-slate-100 text-slate-600'
                                             }`}>
                                               {row.flag}
@@ -321,7 +321,7 @@ export default function ReportsPage() {
                               exit={{ height: 0, opacity: 0 }}
                               className="border-t border-slate-100 p-5"
                             >
-                              <div className="flex items-center gap-3 text-amber-600">
+                              <div className="flex items-center gap-3 text-sky-600">
                                 <Clock size={18} />
                                 <p className="text-sm">Your report is being processed. Please check back in a few hours.</p>
                               </div>

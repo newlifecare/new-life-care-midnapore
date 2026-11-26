@@ -204,8 +204,8 @@ function getInitials(name) {
 
 const SPECIALTY_COLORS = {
   'Cardiothoracic & Vascular Surgery': 'bg-red-100 text-red-700',
-  'Orthopedics & Joint Surgery': 'bg-amber-100 text-amber-700',
-  'Orthopedics & Joint Care': 'bg-amber-100 text-amber-700',
+  'Orthopedics & Joint Surgery': 'bg-cyan-100 text-cyan-700',
+  'Orthopedics & Joint Care': 'bg-cyan-100 text-cyan-700',
   'Surgical Gastroenterology & GI Surgery': 'bg-emerald-100 text-emerald-700',
   'Gastroenterology & Hepatology': 'bg-emerald-100 text-emerald-700',
   'Gynecology & Obstetrics': 'bg-pink-100 text-pink-700',
@@ -214,7 +214,7 @@ const SPECIALTY_COLORS = {
   'Neuropsychiatry & Behavioral Health': 'bg-purple-100 text-purple-700',
   'General Medicine & Critical Care': 'bg-blue-100 text-blue-700',
   'Cardiology': 'bg-red-100 text-red-700',
-  'Orthopedics': 'bg-amber-100 text-amber-700',
+  'Orthopedics': 'bg-cyan-100 text-cyan-700',
   'Gynecology': 'bg-pink-100 text-pink-700',
   'Diabetes & Endocrinology': 'bg-emerald-100 text-emerald-700',
   'Diabetes & Thyroid': 'bg-emerald-100 text-emerald-700',
@@ -322,7 +322,7 @@ function DoctorCard({ doctor }) {
 
       {/* Experience badge */}
       <div className="flex items-center gap-2">
-        <Award className="w-4 h-4 text-amber-500 shrink-0" />
+        <Award className="w-4 h-4 text-rose-600 shrink-0" />
         <span className="text-sm text-slate-600 font-medium">{doctor.experience || '10+ Years'} Experience</span>
       </div>
 
