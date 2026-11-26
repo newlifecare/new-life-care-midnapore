@@ -275,7 +275,7 @@ export default function DiagnosticsPage() {
         <link rel="canonical" href="https://newlifecaredc.in/diagnostics" />
       </Helmet>
 
-      <main className="overflow-x-hidden bg-slate-50 min-h-screen">
+      <main className="overflow-x-hidden bg-gradient-to-b from-[#ebf5fe]/40 via-white/50 to-[#ebf5fe]/60 min-h-screen">
         <PageHero
           title="Diagnostic Tests & Packages"
           subtitle="Comprehensive diagnostics with accurate results, delivered with care."

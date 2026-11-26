@@ -36,13 +36,13 @@ export default function Footer() {
               <img
                 src="/images/logo.jpg"
                 alt="New Life Care Diagnostic Centre Logo"
-                className="w-12 h-12 rounded-full border border-white/20 shadow-md object-cover bg-white"
+                className="w-12 h-12 rounded-full border-2 border-[#d91d24] shadow-md object-cover bg-white p-0.5"
               />
               <div className="leading-tight">
-                <span className="font-extrabold text-white text-lg font-nunito block leading-none">
-                  New <span className="text-rose-400">LIFE CARE</span>
+                <span className="font-black text-white text-lg font-nunito block leading-tight">
+                  New Life Care
                 </span>
-                <span className="text-xs text-sky-300 font-semibold leading-none">
+                <span className="text-xs text-red-400 font-black uppercase tracking-wider leading-none">
                   Diagnostic Centre
                 </span>
               </div>
@@ -50,7 +50,7 @@ export default function Footer() {
             <p className="text-slate-400 text-sm leading-relaxed mb-4">
               NABL M(EL)T Accredited & ISO 9001:2015 Certified Diagnostic Laboratory in Keranitola, Midnapore. Accurate pathology, specialized imaging, and 24/7 emergency service.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-4">
               <span className="bg-emerald-900/50 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-800">
                 ✓ NABL Accredited
               </span>
@@ -60,6 +60,13 @@ export default function Footer() {
               <span className="bg-sky-900/50 text-sky-300 text-xs font-semibold px-3 py-1 rounded-full border border-sky-800">
                 🕐 24/7 Open
               </span>
+            </div>
+            <div className="p-2 bg-white/5 rounded-xl border border-white/10 max-w-[240px]">
+              <img
+                src="/images/accreditations-strip.jpg"
+                alt="NABL, ISO, IAF, KAB Quality Accreditations"
+                className="h-8 object-contain w-full"
+              />
             </div>
           </div>
 

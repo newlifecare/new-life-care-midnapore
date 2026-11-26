@@ -248,7 +248,7 @@ export default function DepartmentsPage() {
         breadcrumb={[{ label: 'Departments' }]}
       />
 
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-gradient-to-b from-transparent via-[#ebf5fe]/60 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={stagger}

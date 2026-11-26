@@ -14,6 +14,22 @@ import {
 
 const MACHINES = [
   {
+    id: 'master-poster',
+    name: 'Our Advanced Laboratory Machinery Showcase',
+    category: 'High-Precision Technology',
+    speed: 'High-Precision Diagnostics',
+    image: '/images/official-centre-poster.jpg',
+    description:
+      'Official machinery fleet of New Life Care Diagnostic Centre in Keranitola. Equipped with automated robotic biochemistry analyzers, 5-part hematology counters, automated centrifuges, and computerized digital microscopes for accurate & reliable reports.',
+    specs: [
+      { label: 'Technology', val: 'Robotic & Laser Flow' },
+      { label: 'Accreditation', val: 'NABL M(EL)T & ISO 9001:2015' },
+      { label: 'Reports', val: 'Accurate & Reliable' },
+      { label: 'Quality Seals', val: 'NABL, ISO, IAF, KAB' },
+    ],
+    whyItMatters: 'Official equipment fleet serving Midnapore with globally accepted diagnostic reports.',
+  },
+  {
     id: 'biochem',
     name: 'AutoQuant Automated Biochemistry Suite',
     category: 'Robotic Clinical Chemistry',
@@ -84,7 +100,7 @@ export default function LabTechnologyShowcase() {
   const active = MACHINES.find((m) => m.id === selectedMachine) || MACHINES[0]
 
   return (
-    <section className="py-16 md:py-24 bg-white relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-[#ebf5ff]/60 via-white/80 to-[#f0f7fe]/60 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

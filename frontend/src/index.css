@@ -31,7 +31,14 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc;
+  background-color: #ebf5fe;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.75) 0px, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(186, 230, 253, 0.65) 0px, transparent 55%),
+    radial-gradient(at 50% 30%, rgba(240, 249, 255, 0.9) 0px, transparent 65%),
+    radial-gradient(at 0% 70%, rgba(224, 242, 254, 0.7) 0px, transparent 55%),
+    radial-gradient(at 100% 100%, rgba(191, 219, 254, 0.65) 0px, transparent 55%);
+  background-attachment: fixed;
   color: #1e293b;
   overflow-x: hidden;
 }

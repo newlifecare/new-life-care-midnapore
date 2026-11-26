@@ -147,7 +147,7 @@ export default function InteractiveHealthExplorer() {
   const Icon = cur.icon
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-transparent via-[#f0f7fe]/70 to-transparent relative overflow-hidden">
       {/* Decorative Brand Ambient */}
       <div className="absolute top-1/2 left-0 w-80 h-80 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 right-0 w-80 h-80 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />

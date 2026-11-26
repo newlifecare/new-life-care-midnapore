@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4 py-16">
+      <main className="min-h-screen bg-gradient-to-br from-[#ebf5ff] via-[#e2f1fd] to-[#f2f8ff] flex items-center justify-center p-4 py-16">
         <div className="w-full max-w-md">
           {/* Brand header */}
           <div className="text-center mb-8">

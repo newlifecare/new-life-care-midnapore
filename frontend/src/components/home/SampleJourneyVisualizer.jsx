@@ -75,7 +75,7 @@ export default function SampleJourneyVisualizer() {
   const [activeStage, setActiveStage] = useState(0)
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50 relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-[#ebf5ff]/50 via-white/70 to-[#ebf5ff]/50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">

@@ -135,7 +135,7 @@ export default function ReportsPage() {
         breadcrumb={[{ label: 'Reports' }]}
       />
 
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-gradient-to-b from-transparent via-[#ebf5fe]/60 to-transparent">
         <div className="max-w-4xl mx-auto px-4">
           {/* Search card */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 mb-8">

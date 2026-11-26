@@ -98,7 +98,7 @@ export default function PageHero({
         >
           <path
             d="M0,48 C360,0 1080,0 1440,48 L1440,48 L0,48 Z"
-            fill="#f8fafc"
+            fill="#ebf5fe"
           />
         </svg>
       </div>

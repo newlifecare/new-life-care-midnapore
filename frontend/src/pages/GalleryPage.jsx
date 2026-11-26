@@ -12,152 +12,107 @@ import {
   Building2,
   Microscope,
   Stethoscope,
-  HeartHandshake,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  CalendarDays,
+  ShieldCheck,
+  CheckCircle2,
+  Activity,
+  MapPin,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import PageTransition from '../components/PageTransition'
 import PageHero from '../components/PageHero'
 import { getGallery } from '../services/api'
 
 const CATEGORIES = [
   { id: 'All', label: 'All Photos & Media', icon: Layers },
-  { id: 'Facilities', label: 'Centres & Lounge', icon: Building2 },
-  { id: 'Equipment', label: 'Lab & Diagnostics', icon: Microscope },
-  { id: 'Doctors', label: 'Specialists & Staff', icon: Stethoscope },
-  { id: 'Events & Camps', label: 'Health Camps', icon: HeartHandshake },
+  { id: 'Equipment', label: 'Advanced Lab Machinery', icon: Microscope },
+  { id: 'Facilities', label: 'Centre & Infrastructure', icon: Building2 },
+  { id: 'Accreditation', label: 'Quality Certifications', icon: Award },
+  { id: 'Doctors', label: 'Specialist Panels', icon: Stethoscope },
 ]
 
-const FALLBACK_GALLERY = [
+const CURATED_GALLERY = [
   {
-    id: 1,
-    title: 'NABL Accredited Pathology Laboratory Floor',
-    description: 'Fully computerized pathology testing floor featuring automated chemistry analyzers, digital microscopes, and neuro-investigations setup.',
+    id: 'poster-card1',
+    title: 'Our Advanced Laboratory Machines & 4-Story Diagnostic Centre',
+    subtitle: 'High-Precision Technology for Accurate & Reliable Reports',
+    description: 'Official master showcase of New Life Care Diagnostic Centre in Keranitola, featuring our dedicated 4-story facility, robotic biochemistry suite, 5-part hematology cell counter, automated ELISA, digital microscope, and international accreditations.',
     category: 'Equipment',
-    imageUrl: '/images/lab-interior-ncv-eeg.jpg',
+    imageUrl: '/images/official-centre-poster.jpg',
     featured: true,
+    specs: ['AutoQuant Biochemistry', '5-Part Cell Counter', 'Digital Centrifuge', '4-Story Centre'],
   },
   {
-    id: 2,
-    title: 'Automated Biochemistry & Cell Counter Analyzers',
-    description: 'High-throughput AutoQuant biochemistry analyzer and computerized 5-part hematology cell counter for precision blood diagnostics.',
-    category: 'Equipment',
-    imageUrl: '/images/lab-packages-equipment.jpg',
+    id: 'accreditation-banner',
+    title: 'Government & International Quality Accreditations',
+    subtitle: 'NABL M(EL)T Accredited & ISO 9001:2015 Certified Pathology',
+    description: 'Official accreditation certification seals: NABL Medical Laboratories (Reg. No. 02159), ISO 9001:2015 Certified Pathology, IAF (International Accreditation Forum), and KAB (Korea Accreditation Board KAB-QC-88). Reports accepted worldwide.',
+    category: 'Accreditation',
+    imageUrl: '/images/header-banner.jpg',
     featured: true,
+    specs: ['NABL M(EL)T Reg. 02159', 'ISO 9001:2015', 'IAF Multilateral', 'KAB-QC-88'],
   },
   {
-    id: 3,
-    title: 'Diagnostic Testing Station & Oxygen Support',
-    description: 'Dedicated diagnostic testing bay with computerized ECG, 24-hr Holter, PFT, EEG and emergency oxygen cylinder availability.',
-    category: 'Facilities',
-    imageUrl: '/images/lab-equipment-oxygen.jpg',
-    featured: true,
-  },
-  {
-    id: 4,
-    title: 'New Life Care Diagnostic Centre - Accredited Centre',
-    description: 'NABL M(EL)T Accredited & ISO 9001:2015 Certified Diagnostic Centre located at Keranitola, Midnapore Town.',
+    id: 'centre-building',
+    title: 'New Life Care Diagnostic Centre — Physical Facility',
+    subtitle: 'Keranitola, Paschim Medinipur - 721101',
+    description: 'Modern 4-story healthcare building accommodating clinical pathology floor, digital X-Ray suite, computerized ECG, ultrasound rooms, emergency oxygen bank, and 19 visiting specialist chambers.',
     category: 'Facilities',
     imageUrl: '/images/banner-main.jpg',
     featured: true,
+    specs: ['Keranitola Town Centre', '4 Floors Dedicated', 'Lift & Wheelchair Access', 'Emergency Oxygen Stock'],
   },
   {
-    id: 5,
-    title: 'Visiting Medical Specialists & Surgeon Panel',
-    description: 'Official panel of 19 experienced specialist doctors across cardiology, neurology, gastroenterology, orthopedics, gynecology, and surgery.',
+    id: 'biochem-analyzers',
+    title: 'Automated AutoQuant Biochemistry Suite & Cell Counters',
+    subtitle: 'High-Throughput Robotic Liquid Pipetting',
+    description: 'Automated spectrophotometric chemistry analyzer running up to 400 tests per hour alongside computerized 5-part laser flow cell counters. Guarantees CV < 1.5% and zero manual dilution error.',
+    category: 'Equipment',
+    imageUrl: '/images/lab-packages-equipment.jpg',
+    featured: true,
+    specs: ['400 Tests / Hour', 'Robotic Liquid Pipetting', 'Dual Daily Calibration', 'Bi-Directional LIS'],
+  },
+  {
+    id: 'lab-floor-ncv-eeg',
+    title: 'Computerized Pathology Floor & Neuro-Diagnostics Suite',
+    subtitle: 'Digital Microscopy & Electrophysiology Station',
+    description: 'Fully automated testing floor with digital Olympus microscopes, automated coagulation stations, and specialized 32-channel video EEG & NCV electrophysiology for brain and nerve disorders.',
+    category: 'Equipment',
+    imageUrl: '/images/lab-interior-ncv-eeg.jpg',
+    featured: true,
+    specs: ['32-Channel Digital EEG', 'Nerve Conduction (NCV)', 'Digital Microscopy', 'Pathologist Verification'],
+  },
+  {
+    id: 'diagnostic-bay-oxygen',
+    title: 'Cardiology Bay, Holter & 24/7 Medical Oxygen Support',
+    subtitle: 'Emergency Oxygen Cylinders Available 24 Hours / 365 Days',
+    description: 'Dedicated diagnostic bay equipped with computerized 12-lead digital ECG with instant automated rhythm analysis, 24-hr ambulatory Holter monitors, PFT spirometry, and 24/7 medical oxygen cylinder supply.',
+    category: 'Facilities',
+    imageUrl: '/images/lab-equipment-oxygen.jpg',
+    featured: true,
+    specs: ['12-Lead Computerized ECG', '24-Hour Ambulatory Holter', '24/7 Oxygen Supply', 'Bedside Monitoring'],
+  },
+  {
+    id: 'specialist-schedule',
+    title: 'Official Visiting Specialist Physicians Panel',
+    subtitle: '19 Visiting Doctors from AIIMS, PGIMER, BHU, SSKM & Manipal',
+    description: 'Comprehensive outpatient specialist chambers offering expert consultations across Cardiology, Neurology, Gastroenterology, Orthopedics, Obstetrics & Gynecology, Oncosurgery, and General Surgery.',
     category: 'Doctors',
     imageUrl: '/images/poster-visiting-doctors.jpg',
     featured: true,
-  },
-  {
-    id: 6,
-    title: 'Orthopedic & Joint Surgery - Dr. S. K. Das',
-    description: 'AIIMS New Delhi trained orthopedic surgeon for arthroscopy, trauma, joint reconstruction, and spine care.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-sk-das.jpg',
-  },
-  {
-    id: 7,
-    title: 'Cardiothoracic Surgery - Dr. Niket Arora',
-    description: 'Senior Consultant from Manipal Hospitals for advanced cardiovascular and thoracic surgical advisories.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-niket-arora.jpg',
-  },
-  {
-    id: 8,
-    title: 'Surgical Gastroenterology - Dr. Panchanan Panigrahi',
-    description: 'Specialized gastrointestinal, laparoscopic, and hepatology diagnostic consultations from BHU.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-panchanan-panigrahi.jpg',
-  },
-  {
-    id: 9,
-    title: 'Gynecology & High-Risk Pregnancy - Dr. Ayesha Sultana',
-    description: 'MRCOG London and DNB specialist providing women healthcare, antenatal consultation, and reproductive health advisory.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-ayesha-sultana.jpg',
-  },
-  {
-    id: 10,
-    title: 'Neurology & Epilepsy Care - Dr. Archisman Haldar',
-    description: 'AIIMS-trained neurology specialist providing diagnosis for epilepsy, neuropathies, and stroke care.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-archisman-haldar.jpg',
-  },
-  {
-    id: 11,
-    title: 'Head & Neck Oncosurgery - Dr. Samujjwal Das',
-    description: 'Specialist consultation from Desun Hospital for oral, facial, head and neck tumor evaluation.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-samujjwal-das.jpg',
-  },
-  {
-    id: 12,
-    title: 'General & Laparoscopic OT Team - Dr. Biswajit Panda',
-    description: 'State-of-the-art operating theater setup for minimally invasive laparoscopic hernia and gallstone procedures.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-biswajit-panda.jpg',
-  },
-  {
-    id: 13,
-    title: 'Neuropsychiatry & Behavioral Health - Dr. Konika Das',
-    description: 'SSKM-trained consultant neuropsychiatrist for anxiety, depression, sleep disorders, and psychiatric counseling.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-konika-das.jpg',
-  },
-  {
-    id: 14,
-    title: 'Gynecology & Infertility - Dr. Arpita Maiti',
-    description: 'Consultant Gynecologist, Obstetrician, and Infertility Specialist, Ex-Midnapore Medical College & Hospital.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-arpita-maiti.jpg',
-  },
-  {
-    id: 15,
-    title: 'Gastroenterology & Hepatology - Dr. Sushovan Maiti',
-    description: 'SSKM & Asian Institute of Gastroenterology (AIG) specialist treating acid peptic disorders and liver diseases.',
-    category: 'Doctors',
-    imageUrl: '/images/doctors/dr-sushovan-maiti.jpg',
+    specs: ['AIIMS New Delhi', 'Manipal Hospitals', 'BHU Varanasi', 'SSKM Hospital'],
   },
 ]
-
-// Convert YouTube watch URL or share URL to embed URL
-const getYouTubeEmbedUrl = (url) => {
-  if (!url) return null
-  try {
-    if (url.includes('embed/')) return url
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
-    const match = url.match(regExp)
-    if (match && match[2].length === 11) {
-      return `https://www.youtube.com/embed/${match[2]}?autoplay=1`
-    }
-  } catch (_) {}
-  return url
-}
 
 export default function GalleryPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('All')
-  const [activeModal, setActiveModal] = useState(null) // { type: 'image' | 'video', url, title, desc }
+  const [modalIndex, setModalIndex] = useState(null) // index in displayItems
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -165,19 +120,15 @@ export default function GalleryPage() {
       try {
         const data = await getGallery(activeCategory === 'All' ? null : activeCategory)
         if (Array.isArray(data) && data.length > 0) {
-          setItems(data)
+          // Merge API data with curated items so official poster is always included
+          const posterExists = data.some((i) => i.imageUrl?.includes('official-centre-poster'))
+          const combined = posterExists ? data : [CURATED_GALLERY[0], ...data]
+          setItems(combined)
         } else {
-          const filtered = activeCategory === 'All'
-            ? FALLBACK_GALLERY
-            : FALLBACK_GALLERY.filter((item) => item.category === activeCategory)
-          setItems(filtered)
+          setItems(CURATED_GALLERY)
         }
       } catch (err) {
-        console.error('Error fetching gallery:', err)
-        const filtered = activeCategory === 'All'
-          ? FALLBACK_GALLERY
-          : FALLBACK_GALLERY.filter((item) => item.category === activeCategory)
-        setItems(filtered)
+        setItems(CURATED_GALLERY)
       } finally {
         setLoading(false)
       }
@@ -185,27 +136,127 @@ export default function GalleryPage() {
     fetchGallery()
   }, [activeCategory])
 
-  const filteredItems = items
+  const displayItems = activeCategory === 'All'
+    ? items
+    : items.filter((item) => item.category === activeCategory)
+
+  const activeModalItem = modalIndex !== null ? displayItems[modalIndex] : null
+
+  const handleNextModal = () => {
+    if (modalIndex === null) return
+    setModalIndex((modalIndex + 1) % displayItems.length)
+  }
+
+  const handlePrevModal = () => {
+    if (modalIndex === null) return
+    setModalIndex(modalIndex === 0 ? displayItems.length - 1 : modalIndex - 1)
+  }
 
   return (
     <PageTransition>
       <Helmet>
-        <title>Hospital & Lab Gallery | New Life Care Diagnostic Centre - Midnapore</title>
+        <title>Diagnostic Centre & Lab Gallery | New Life Care - Keranitola, Midnapore</title>
         <meta
           name="description"
-          content="Explore photos and video tours of New Life Care Diagnostic Centre in Midnapore. View our advanced pathology lab, digital X-Ray equipment, USG rooms, and specialist doctors."
+          content="Explore the high-precision laboratory machinery, 4-story centre building, computerized pathology floor, NABL certifications, and testing bays of New Life Care Diagnostic Centre in Keranitola."
         />
       </Helmet>
 
+      {/* Page Hero Header */}
       <PageHero
-        badge="Visual Tour"
-        title="Our Infrastructure, Equipment & Dedicated Team"
-        subtitle="Take a look inside Midnapore's premier NABL-certified diagnostic centre and nursing care facility."
+        badge="Official Facility Tour"
+        title="Inside Midnapore's Premier NABL Diagnostic Centre"
+        subtitle="Explore our advanced automated laboratory machinery, 4-story facility, diagnostic testing bays, and international quality accreditations."
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        {/* Category Filter Tabs */}
-        <section aria-label="Media Category Filters" className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 scrollbar-none">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        
+        {/* ── TOP FEATURED EXHIBIT: The Official 1st Card Poster ── */}
+        <section className="mb-14">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 rounded-3xl p-6 sm:p-8 lg:p-10 border-2 border-slate-800 shadow-2xl relative overflow-hidden text-white">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+              
+              {/* Poster Left Description */}
+              <div className="lg:col-span-5 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="text-xs font-black uppercase tracking-widest text-rose-400">
+                    Official Centre Showcase
+                  </span>
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-nunito leading-tight mb-3">
+                  <span className="text-blue-400">New Life Care</span>
+                  <span className="block text-red-500">Diagnostic Centre</span>
+                </h2>
+
+                <div className="inline-block bg-[#d91d24] text-white font-black text-xs px-3.5 py-1.5 rounded-lg shadow-sm mb-4">
+                  NABL M(EL)T Accredited & ISO 9001 : 2015 Certified Laboratory
+                </div>
+
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 font-normal">
+                  Our premier diagnostic facility situated at Keranitola, Paschim Medinipur. Powered by computerized high-precision machinery, dual pathologist verification, and 24/7 emergency home collection.
+                </p>
+
+                {/* Quality Seals Row */}
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10 mb-6 flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-300">
+                    Quality Seals:
+                  </span>
+                  <img
+                    src="/images/accreditations-strip.jpg"
+                    alt="NABL, ISO, IAF, KAB"
+                    className="h-8 object-contain"
+                  />
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setModalIndex(0)}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#d91d24] to-red-600 hover:from-red-500 hover:to-red-700 text-white font-black text-sm shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                  >
+                    <Maximize2 size={16} />
+                    <span>Enlarge Full Poster</span>
+                  </button>
+                  <Link
+                    to="/book-collection"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-sm border border-white/20 transition-all"
+                  >
+                    <CalendarDays size={16} />
+                    <span>Book Home Test</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Poster Right Image Card */}
+              <div className="lg:col-span-7 flex justify-center">
+                <div
+                  onClick={() => setModalIndex(0)}
+                  className="relative rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black cursor-zoom-in group max-w-2xl w-full"
+                >
+                  <img
+                    src="/images/official-centre-poster.jpg"
+                    alt="New Life Care Diagnostic Centre - Advanced Machines & Building"
+                    className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#d91d24] text-white font-black text-xs shadow-lg">
+                      <Maximize2 size={14} />
+                      Click to View Full Resolution
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Category Filter Tabs ── */}
+        <section aria-label="Media Category Filters" className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon
             const isActive = activeCategory === cat.id
@@ -213,10 +264,10 @@ export default function GalleryPage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-sky-300 hover:bg-sky-50/50'
+                    ? 'bg-gradient-to-r from-[#d91d24] to-red-600 text-white shadow-md shadow-red-600/20 scale-102'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -226,190 +277,241 @@ export default function GalleryPage() {
           })}
         </section>
 
-        {/* Gallery Grid */}
+        {/* ── Gallery Cards Grid ── */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3 animate-pulse">
-                <div className="h-56 bg-slate-200 rounded-xl" />
+              <div key={n} className="bg-white rounded-3xl border border-slate-200 p-4 space-y-3 animate-pulse">
+                <div className="h-60 bg-slate-200 rounded-2xl" />
                 <div className="h-4 bg-slate-200 rounded w-2/3" />
                 <div className="h-3 bg-slate-100 rounded w-full" />
               </div>
             ))}
           </div>
-        ) : filteredItems.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 p-8">
+        ) : displayItems.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 p-8">
             <Images className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-700">No media available in this category</h3>
-            <p className="text-slate-400 text-sm mt-1">Please select another category or check back soon.</p>
+            <h3 className="text-lg font-bold text-slate-700">No media found in this category</h3>
+            <p className="text-slate-400 text-sm mt-1">Please select another category above.</p>
           </div>
         ) : (
           <motion.section
-            aria-label="Gallery Media Grid"
+            aria-label="Diagnostic Centre Gallery Grid"
             layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
           >
-            {filteredItems.map((item, idx) => {
-              const hasVideo = Boolean(item.youtubeUrl)
-              return (
-                <motion.article
-                  key={item._id || item.id || idx}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: idx * 0.05 }}
-                  className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
-                >
-                  {/* Media Visual Container */}
-                  <div className="relative h-60 w-full overflow-hidden bg-slate-100">
+            {displayItems.map((item, idx) => (
+              <motion.article
+                key={item._id || item.id || idx}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:border-slate-300"
+              >
+                <div>
+                  {/* Image Viewport */}
+                  <div
+                    onClick={() => setModalIndex(idx)}
+                    className="relative h-64 sm:h-70 w-full overflow-hidden bg-slate-900 cursor-zoom-in"
+                  >
                     <img
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'}
+                      src={item.imageUrl}
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover sm:object-contain bg-slate-950 group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-50 group-hover:opacity-75 transition-opacity" />
 
-                    {/* Category Pill */}
-                    <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-md text-sky-800 px-3 py-1 rounded-full shadow-sm">
-                      {item.category || 'Hospital'}
+                    {/* Category Tag */}
+                    <span className="absolute top-3.5 left-3.5 text-[10px] font-black uppercase tracking-wider bg-white/90 backdrop-blur-md text-[#d91d24] px-3 py-1 rounded-full shadow-sm">
+                      {item.category || 'Diagnostic'}
                     </span>
 
-                    {/* Play or Inspect Button */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {hasVideo ? (
-                        <button
-                          onClick={() =>
-                            setActiveModal({
-                              type: 'video',
-                              url: item.youtubeUrl,
-                              title: item.title,
-                              desc: item.description,
-                            })
-                          }
-                          aria-label={`Play video: ${item.title}`}
-                          className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform cursor-pointer"
-                        >
-                          <Play className="w-6 h-6 fill-white ml-0.5" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() =>
-                            setActiveModal({
-                              type: 'image',
-                              url: item.imageUrl,
-                              title: item.title,
-                              desc: item.description,
-                            })
-                          }
-                          aria-label={`Enlarge photo: ${item.title}`}
-                          className="w-12 h-12 rounded-full bg-white/80 hover:bg-white text-slate-800 flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transform group-hover:scale-105 transition-all cursor-pointer"
-                        >
-                          <Maximize2 className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-
-                    {hasVideo && (
-                      <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 bg-red-600/90 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
-                        <Video className="w-3 h-3" /> Video Tour
+                    {/* Inspect Badge */}
+                    <div className="absolute top-3.5 right-3.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#d91d24] text-white shadow-md">
+                        <Maximize2 size={11} />
+                        Zoom
                       </span>
-                    )}
-                  </div>
-
-                  {/* Caption */}
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h2 className="font-bold text-slate-800 text-lg mb-2 leading-snug group-hover:text-sky-600 transition-colors">
-                        {item.title}
-                      </h2>
-                      {item.description && (
-                        <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
-                          {item.description}
-                        </p>
-                      )}
                     </div>
 
-                    {hasVideo && (
-                      <button
-                        onClick={() =>
-                          setActiveModal({
-                            type: 'video',
-                            url: item.youtubeUrl,
-                            title: item.title,
-                            desc: item.description,
-                          })
-                        }
-                        className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-sky-600" /> Watch YouTube Video &rarr;
-                      </button>
+                    {/* Subtitle Bar */}
+                    {item.subtitle && (
+                      <div className="absolute bottom-2.5 left-3.5 right-3.5 text-[11px] font-bold text-amber-300 truncate">
+                        {item.subtitle}
+                      </div>
                     )}
                   </div>
-                </motion.article>
-              )
-            })}
+
+                  {/* Card Content */}
+                  <div className="p-5">
+                    <h3 className="font-black text-slate-900 text-base leading-snug group-hover:text-[#07478f] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-xs mt-2 leading-relaxed line-clamp-3">
+                      {item.description}
+                    </p>
+
+                    {/* Spec Tags if available */}
+                    {item.specs && item.specs.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-100">
+                        {item.specs.map((sp, sIdx) => (
+                          <span
+                            key={sIdx}
+                            className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md"
+                          >
+                            {sp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Card Action Footer */}
+                <div className="px-5 pb-5 pt-2 flex items-center justify-between border-t border-slate-100">
+                  <button
+                    onClick={() => setModalIndex(idx)}
+                    className="text-xs font-bold text-[#d91d24] hover:text-red-700 inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Maximize2 size={13} />
+                    <span>Inspect Image</span>
+                  </button>
+
+                  <Link
+                    to="/book-collection"
+                    className="text-xs font-bold text-slate-700 hover:text-[#07478f] inline-flex items-center gap-1"
+                  >
+                    <span>Book Test</span>
+                    <CheckCircle2 size={13} className="text-emerald-600" />
+                  </Link>
+                </div>
+              </motion.article>
+            ))}
           </motion.section>
         )}
 
-        {/* Lightbox / Video Modal */}
-        <AnimatePresence>
-          {activeModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveModal(null)}
-              className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm p-4 sm:p-8 flex items-center justify-center"
+        {/* ── Emergency Oxygen & Hotline Assistance Banner ── */}
+        <section className="mt-16 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-rose-400 block mb-1">
+              Direct Emergency & Booking Desk
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black font-nunito">
+              Need a Test Booking or Medical Oxygen Cylinder?
+            </h3>
+            <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-xl">
+              Our phlebotomists provide 24/7 doorstep home sample collection anywhere across Midnapore Town and adjoining areas.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <a
+              href="tel:9733525031"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#d91d24] hover:bg-red-700 text-white font-black text-sm shadow-lg shadow-red-600/30 transition-all"
             >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-3xl overflow-hidden max-w-4xl w-full shadow-2xl relative"
-              >
-                <button
-                  onClick={() => setActiveModal(null)}
-                  className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-
-                {activeModal.type === 'video' ? (
-                  <div className="relative pt-[56.25%] bg-black">
-                    <iframe
-                      src={getYouTubeEmbedUrl(activeModal.url)}
-                      title={activeModal.title}
-                      className="absolute inset-0 w-full h-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ) : (
-                  <div className="max-h-[70vh] bg-slate-950 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={activeModal.url}
-                      alt={activeModal.title}
-                      className="max-h-[70vh] w-auto object-contain"
-                    />
-                  </div>
-                )}
-
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-slate-800">{activeModal.title}</h3>
-                  {activeModal.desc && (
-                    <p className="text-sm text-slate-600 mt-2 leading-relaxed">{activeModal.desc}</p>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <Phone size={16} />
+              <span>Call 97335 25031</span>
+            </a>
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-all"
+            >
+              <span>Visit Us in Keranitola</span>
+            </Link>
+          </div>
+        </section>
       </main>
+
+      {/* ── Lightbox Modal with Full Zoom & Navigation ── */}
+      <AnimatePresence>
+        {activeModalItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setModalIndex(null)}
+            className="fixed inset-0 z-50 bg-black/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-5xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col max-h-[94vh]"
+            >
+              {/* Header */}
+              <div className="p-4 bg-slate-950 flex items-center justify-between border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-black bg-[#d91d24] text-white">
+                    {activeModalItem.category}
+                  </span>
+                  <h3 className="text-white font-bold text-sm sm:text-base line-clamp-1">
+                    {activeModalItem.title}
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-slate-400 mr-2">
+                    {modalIndex + 1} / {displayItems.length}
+                  </span>
+                  <button
+                    onClick={() => setModalIndex(null)}
+                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Image & Prev/Next Nav */}
+              <div className="relative flex-1 bg-black flex items-center justify-center overflow-auto p-2">
+                <img
+                  src={activeModalItem.imageUrl}
+                  alt={activeModalItem.title}
+                  className="max-h-[66vh] w-auto max-w-full object-contain rounded-xl"
+                />
+
+                {/* Arrows */}
+                <button
+                  onClick={handlePrevModal}
+                  aria-label="Previous"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 hover:bg-[#d91d24] text-white flex items-center justify-center transition-all cursor-pointer"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  onClick={handleNextModal}
+                  aria-label="Next"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 hover:bg-[#d91d24] text-white flex items-center justify-center transition-all cursor-pointer"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </div>
+
+              {/* Footer Info */}
+              <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+                <div>
+                  <p className="font-bold text-white text-sm">{activeModalItem.subtitle || activeModalItem.title}</p>
+                  <p className="text-slate-400 mt-0.5 line-clamp-2">{activeModalItem.description}</p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    to="/book-collection"
+                    onClick={() => setModalIndex(null)}
+                    className="px-4 py-2 bg-[#d91d24] hover:bg-red-700 text-white font-bold rounded-xl transition-colors"
+                  >
+                    Book Home Collection
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageTransition>
   )
 }
-

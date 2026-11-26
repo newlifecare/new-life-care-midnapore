@@ -15,11 +15,16 @@ import {
   Star,
   Images,
   Maximize2,
+  X,
   Phone,
+  ShieldCheck,
+  Microscope,
+  MapPin,
+  Clock,
 } from 'lucide-react'
 import { getGallery } from '../services/api'
 
-// Institutional affiliations from the official flyers
+// Institutional affiliations from official flyers
 const INSTITUTES = [
   { name: 'AIIMS New Delhi', badge: 'Orthopedic Surgery' },
   { name: 'Manipal Hospitals', badge: 'Cardiothoracic Surgery' },
@@ -36,62 +41,78 @@ const INSTITUTES = [
 
 const ROTATING_SPECIALTIES = [
   { title: 'Cardiothoracic & Vascular Surgery', doctor: 'Dr. Niket Arora (Manipal Hospitals)', color: 'text-rose-600' },
-  { title: 'Orthopedics & Spine Trauma', doctor: 'Dr. S. K. Das (AIIMS New Delhi)', color: 'text-slate-900' },
+  { title: 'Orthopedics & Spine Trauma', doctor: 'Dr. S. K. Das (AIIMS New Delhi)', color: 'text-[#07478f]' },
   { title: 'Advanced GI & Hepatology', doctor: 'Dr. Panchanan Panigrahi (BHU)', color: 'text-emerald-700' },
   { title: 'Obstetrics, High-Risk Pregnancy', doctor: 'Dr. Ayesha Sultana (MRCOG London)', color: 'text-rose-600' },
-  { title: 'Neurology & Neuro-Diagnostics', doctor: 'Dr. Archisman Haldar (AIIMS)', color: 'text-slate-900' },
+  { title: 'Neurology & Neuro-Diagnostics', doctor: 'Dr. Archisman Haldar (AIIMS)', color: 'text-[#07478f]' },
   { title: 'Head & Neck Oncosurgery', doctor: 'Dr. Samujjwal Das (Desun Hospital)', color: 'text-indigo-700' },
   { title: 'Neuropsychiatry & Behavioral Health', doctor: 'Dr. Konika Das (SSKM Hospital)', color: 'text-purple-700' },
   { title: 'General & Laparoscopic Surgery', doctor: 'Dr. Biswajit Panda (MS Laparoscopic)', color: 'text-rose-600' },
 ]
 
-// Default verified clinic & laboratory photos for the Hero Gallery slider
-const DEFAULT_HERO_GALLERY = [
+// High-impact curated exhibits with the Official Poster as #1
+const PRIMARY_GALLERY_EXHIBITS = [
   {
-    id: 'lab-floor',
-    title: 'NABL Accredited Pathology Laboratory Floor',
-    description: 'Fully computerized floor featuring automated chemistry analyzers, digital microscopes, and neuro-diagnostics setup.',
-    category: 'Pathology Lab',
-    imageUrl: '/images/lab-interior-ncv-eeg.jpg',
+    id: 'official-poster-card1',
+    tabTitle: '⭐ Official Centre Poster',
+    title: 'Our Advanced Laboratory Machines & Facility',
+    subtitle: 'High-Precision Technology for Accurate & Reliable Reports',
+    description: 'NABL Accredited & ISO 9001:2015 Certified Centre featuring our 4-story facility in Keranitola and automated lab testing machinery.',
+    category: 'Accredited Centre',
+    imageUrl: '/images/official-centre-poster.jpg',
+    featuredTag: 'Official Brand Card',
   },
   {
-    id: 'biochem-analyzers',
-    title: 'Automated Biochemistry & 5-Part Cell Counter',
-    description: 'High-throughput AutoQuant analyzer and computerized 5-part hematology cell counter for precision diagnostics.',
+    id: 'biochem-floor',
+    tabTitle: '🔬 Advanced Lab Machines',
+    title: 'Automated Biochemistry & Cell Counter Analyzers',
+    subtitle: 'Robotic Liquid Sensing & 28-Parameter Hematology',
+    description: 'High-throughput AutoQuant analyzer and computerized 5-part hematology cell counter ensuring standard deviation < 1.5%.',
     category: 'Diagnostic Suite',
     imageUrl: '/images/lab-packages-equipment.jpg',
+    featuredTag: 'Precision Testing',
+  },
+  {
+    id: 'building-exterior',
+    tabTitle: '🏢 4-Story Centre',
+    title: 'New Life Care Diagnostic Centre — Midnapore',
+    subtitle: 'Keranitola, Paschim Medinipur (721101)',
+    description: 'Multi-specialty diagnostic infrastructure with pathology floor, digital X-Ray, computerized ECG, ultrasound & doctor chambers.',
+    category: 'Keranitola Facility',
+    imageUrl: '/images/banner-main.jpg',
+    featuredTag: 'Physical Centre',
   },
   {
     id: 'diagnostic-bay',
-    title: 'Computerized ECG, Holter & Oxygen Support',
-    description: 'Dedicated diagnostic testing bay with computerized ECG, 24-hr Holter, PFT, EEG and emergency oxygen cylinders available 24/7.',
+    tabTitle: '🩺 ECG & Oxygen Bay',
+    title: 'Computerized ECG, Holter & 24/7 Oxygen Support',
+    subtitle: 'Cardiology Care & Emergency Cylinder Supply',
+    description: 'Dedicated diagnostic bay equipped with computerized 12-lead ECG, 24-hr Holter, PFT, EEG and emergency oxygen cylinders available 24/7.',
     category: 'Testing Bays',
     imageUrl: '/images/lab-equipment-oxygen.jpg',
-  },
-  {
-    id: 'centre-main',
-    title: 'New Life Care Diagnostic Centre — Midnapore',
-    description: 'NABL M(EL)T Accredited & ISO 9001:2015 Certified diagnostic facility situated in Keranitola, Midnapore Town.',
-    category: 'Accredited Centre',
-    imageUrl: '/images/banner-main.jpg',
+    featuredTag: '24/7 Available',
   },
   {
     id: 'specialist-schedule',
-    title: 'Official Visiting Specialist Physicians Panel',
-    description: 'Chamber schedule of 19 visiting specialists and surgeons from AIIMS, PGIMER, BHU, SSKM, and Manipal Hospitals.',
+    tabTitle: '👨‍⚕️ Visiting Doctors',
+    title: 'Visiting Specialist Physicians Panel',
+    subtitle: '19 Doctors from AIIMS, PGIMER, BHU, SSKM & Manipal',
+    description: 'Regular outpatient consultation chambers across cardiology, neurology, gastroenterology, orthopedics, gynecology and surgery.',
     category: 'Specialist Chambers',
     imageUrl: '/images/poster-visiting-doctors.jpg',
+    featuredTag: '19 Specialists',
   },
 ]
 
 export default function HeroSection() {
   const [specialtyIdx, setSpecialtyIdx] = useState(0)
-  const [galleryItems, setGalleryItems] = useState(DEFAULT_HERO_GALLERY)
+  const [galleryItems, setGalleryItems] = useState(PRIMARY_GALLERY_EXHIBITS)
   const [slideIdx, setSlideIdx] = useState(0)
   const [direction, setDirection] = useState(1)
   const [isPaused, setIsPaused] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  // Rotating specialty words every 3.5s
+  // Rotating specialty word ticker
   useEffect(() => {
     const timer = setInterval(() => {
       setSpecialtyIdx((prev) => (prev + 1) % ROTATING_SPECIALTIES.length)
@@ -99,32 +120,13 @@ export default function HeroSection() {
     return () => clearInterval(timer)
   }, [])
 
-  // Fetch real gallery items from backend API
-  useEffect(() => {
-    const loadGallery = async () => {
-      try {
-        const data = await getGallery()
-        if (Array.isArray(data) && data.length > 0) {
-          const valid = data.filter((item) => item.imageUrl && item.category !== 'Doctors')
-          if (valid.length > 0) {
-            setGalleryItems(valid)
-          } else {
-            const anyValid = data.filter((item) => item.imageUrl)
-            if (anyValid.length > 0) setGalleryItems(anyValid)
-          }
-        }
-      } catch (_) {}
-    }
-    loadGallery()
-  }, [])
-
-  // Auto-switch photo every 5 seconds (5000ms)
+  // Auto-switch photo every 5.5 seconds unless paused
   useEffect(() => {
     if (isPaused || galleryItems.length <= 1) return
     const timer = setInterval(() => {
       setDirection(1)
       setSlideIdx((prev) => (prev + 1) % galleryItems.length)
-    }, 5000)
+    }, 5500)
     return () => clearInterval(timer)
   }, [isPaused, galleryItems.length])
 
@@ -142,7 +144,7 @@ export default function HeroSection() {
     enter: (dir) => ({
       x: dir > 0 ? '100%' : '-100%',
       opacity: 0,
-      scale: 0.97,
+      scale: 0.98,
     }),
     center: {
       x: 0,
@@ -157,7 +159,7 @@ export default function HeroSection() {
     exit: (dir) => ({
       x: dir > 0 ? '-100%' : '100%',
       opacity: 0,
-      scale: 0.97,
+      scale: 0.98,
       transition: {
         x: { type: 'spring', stiffness: 280, damping: 28 },
         opacity: { duration: 0.25 },
@@ -170,402 +172,540 @@ export default function HeroSection() {
   const curSlide = galleryItems[slideIdx] || galleryItems[0]
 
   return (
-    <section className="relative bg-gradient-to-b from-slate-50/90 via-white to-slate-50/60 text-slate-900 overflow-hidden min-h-screen flex flex-col justify-between pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-0">
-      {/* Subtle Luminous Brand Ambient Glows (Crimson Red & Warm Platinum) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[120px]" />
-        <div className="absolute top-1/3 -right-24 w-[500px] h-[500px] bg-rose-500/4 rounded-full blur-[130px]" />
-        <div className="absolute -bottom-24 left-1/3 w-[600px] h-[600px] bg-slate-300/20 rounded-full blur-[140px]" />
+    <>
+      <section className="relative bg-gradient-to-br from-[#ebf5ff] via-[#e2f1fd] to-[#f2f8ff] text-slate-900 overflow-hidden min-h-screen flex flex-col justify-between pt-28 sm:pt-32 md:pt-36 lg:pt-38 pb-0">
+        {/* Luminous Light Bluish Clinical Gradient Glows */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Soft sky-blue & azure luminous radial glow orbs */}
+          <div className="absolute -top-28 -left-20 w-[600px] h-[600px] bg-sky-300/25 rounded-full blur-[140px]" />
+          <div className="absolute top-1/4 -right-24 w-[650px] h-[650px] bg-blue-400/20 rounded-full blur-[150px]" />
+          <div className="absolute top-1/2 left-1/3 w-[550px] h-[550px] bg-cyan-200/20 rounded-full blur-[140px]" />
+          <div className="absolute -bottom-28 right-1/4 w-[600px] h-[600px] bg-sky-200/30 rounded-full blur-[150px]" />
+          <div className="absolute top-20 left-1/2 w-[400px] h-[400px] bg-rose-500/5 rounded-full blur-[120px]" />
 
-        {/* Subtle dot pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #0f172a 1px, transparent 0)`,
-            backgroundSize: '32px 32px',
-          }}
-        />
-      </div>
+          {/* Hexagonal Medical Geometry Overlay (From Card 1 Theme) */}
+          <div className="absolute top-12 right-8 w-72 h-72 opacity-25 pointer-events-none hidden md:block">
+            <svg viewBox="0 0 200 200" className="w-full h-full fill-none stroke-sky-500 stroke-[1.5]">
+              <polygon points="100,10 130,28 130,62 100,80 70,62 70,28" />
+              <polygon points="160,45 190,63 190,97 160,115 130,97 130,63" />
+              <polygon points="100,80 130,98 130,132 100,150 70,132 70,98" />
+              <polygon points="40,45 70,63 70,97 40,115 10,97 10,63" />
+              <polygon points="160,115 190,133 190,167 160,185 130,167 130,133" />
+            </svg>
+          </div>
 
-      {/* Elegant SVG Heartbeat / ECG Line across background */}
-      <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 opacity-[0.06] pointer-events-none select-none overflow-hidden">
-        <svg viewBox="0 0 1200 120" className="w-full h-24" preserveAspectRatio="none">
-          <path
-            d="M 0,60 L 200,60 L 220,20 L 240,100 L 260,30 L 280,75 L 300,60 L 500,60 L 520,10 L 540,110 L 560,20 L 580,80 L 600,60 L 800,60 L 820,20 L 840,100 L 860,30 L 880,75 L 900,60 L 1200,60"
-            fill="none"
-            stroke="url(#ecgRedGradient)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
+          {/* Micro precision dot grid */}
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, #0369a1 1px, transparent 0)`,
+              backgroundSize: '28px 28px',
+            }}
           />
-          <defs>
-            <linearGradient id="ecgRedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#e11d48" />
-              <stop offset="50%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#e11d48" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+        </div>
 
-      {/* Main Container */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto py-6 sm:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-          
-          {/* Left Column: Headlines & Action Matrix */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+        {/* Dynamic Heartbeat / ECG Wave Line across the background */}
+        <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 opacity-[0.09] pointer-events-none select-none overflow-hidden">
+          <svg viewBox="0 0 1200 120" className="w-full h-28" preserveAspectRatio="none">
+            <path
+              d="M 0,60 L 200,60 L 220,20 L 240,100 L 260,30 L 280,75 L 300,60 L 500,60 L 520,10 L 540,110 L 560,20 L 580,80 L 600,60 L 800,60 L 820,20 L 840,100 L 860,30 L 880,75 L 900,60 L 1200,60"
+              fill="none"
+              stroke="url(#ecgThemeGradient)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            <defs>
+              <linearGradient id="ecgThemeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#07478f" />
+                <stop offset="50%" stopColor="#d91d24" />
+                <stop offset="100%" stopColor="#07478f" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto py-6 sm:py-8 lg:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             
-            {/* Accreditation & Location Pills */}
-            <motion.div
-              initial={{ opacity: 0, y: -15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-wrap items-center gap-2 mb-4 select-none"
-            >
-              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-2xs">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-                <span>NABL M(EL)T Accredited & ISO 9001:2015</span>
-              </div>
-              <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-                <Building2 size={13} className="text-slate-600" />
-                <span>Keranitola, Midnapore Town (721101)</span>
-              </div>
-              <div className="inline-flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-full">
-                <Star size={13} className="text-rose-600 fill-rose-600" />
-                <span>4.9★ (163+ Google Reviews)</span>
-              </div>
-            </motion.div>
-
-            {/* Main Headline with Brand Crimson Red Typography */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <div className="flex items-center gap-3 mb-3">
+            {/* ── Left Column: Prominent Branding & Name (Styled like 1st Card) ── */}
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
+              
+              {/* Top Tag & Identity Row */}
+              <motion.div
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center gap-3 mb-3.5"
+              >
                 <img
                   src="/images/logo.jpg"
-                  alt="New Life Care Diagnostic Centre Logo"
-                  className="w-12 h-12 rounded-full border-2 border-slate-200 shadow-md object-cover bg-white shrink-0"
+                  alt="New Life Care Diagnostic Centre Official Logo"
+                  className="w-13 h-13 sm:w-15 sm:h-15 rounded-full border-2 border-[#d91d24] shadow-md object-cover bg-white shrink-0 p-0.5"
                 />
                 <div>
-                  <span className="text-[11px] uppercase tracking-widest font-black text-rose-600 block leading-tight">
-                    Government Registered Medical Diagnostic Lab
-                  </span>
-                  <span className="text-xs text-slate-500 font-semibold">
-                    Reg. No. 02159 • Slogan: "We care for you..."
-                  </span>
-                </div>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-nunito tracking-tight leading-[1.12] mb-3 text-slate-900">
-                New <span className="text-rose-600">LIFE CARE</span>
-                <span className="block text-slate-900">
-                  Diagnostic Centre
-                </span>
-                <span className="block text-lg sm:text-2xl md:text-3xl font-extrabold text-slate-700 mt-2 font-nunito">
-                  Premier NABL Certified Pathology & Diagnostics in Midnapore
-                </span>
-              </h1>
-
-              {/* Bengali Official Title */}
-              <p className="text-slate-600 text-xs sm:text-sm font-medium tracking-wide mb-5 flex items-center gap-2">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500" />
-                নিউ লাইফ কেয়ার ডায়াগনস্টিক সেন্টার — নির্ভুল রিপোর্ট ও অভিজ্ঞ বিশেষজ্ঞ চিকিৎসক
-              </p>
-            </motion.div>
-
-            {/* Rotating Specialty Highlight Banner */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm mb-6 relative overflow-hidden group hover:border-slate-300 transition-colors"
-            >
-              <div className="flex items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-600 to-red-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-600/20">
-                    <Stethoscope size={22} />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-black text-rose-600 uppercase tracking-wider block">
-                      Live Specialist Chamber
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#d91d24] bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full inline-block">
+                      Govt. Regd. Lab • Reg. No. 02159
                     </span>
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={curSpec.title}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <p className={`text-base sm:text-lg font-bold font-nunito leading-tight ${curSpec.color}`}>
-                          {curSpec.title}
-                        </p>
-                        <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                          {curSpec.doctor}
-                        </p>
-                      </motion.div>
-                    </AnimatePresence>
+                    <span className="text-xs text-slate-500 font-bold italic hidden sm:inline-block">
+                      "We care for you..."
+                    </span>
                   </div>
+                  <span className="text-xs text-slate-600 font-semibold flex items-center gap-1.5 mt-0.5">
+                    <MapPin size={12} className="text-[#d91d24]" />
+                    Keranitola, Paschim Medinipur - 721101
+                  </span>
                 </div>
+              </motion.div>
+
+              {/* ── PROMINENT HERO TITLE (Exact Match to 1st Card Theme) ── */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mb-3"
+              >
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-nunito tracking-tight leading-[1.06]">
+                  <span className="text-[#07478f] block">
+                    New Life Care
+                  </span>
+                  <span className="text-[#d91d24] flex items-center gap-2 flex-wrap mt-1">
+                    <span>Diagnostic Centre</span>
+                    <svg
+                      viewBox="0 0 90 24"
+                      className="w-16 sm:w-20 h-6 text-[#d91d24] inline-block shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M0 12h20l5-9 6 18 5-13 4 8 5-4h45" />
+                    </svg>
+                  </span>
+                </h1>
+
+                {/* Card-Style Official Red Accreditation Ribbon */}
+                <div className="mt-3.5 inline-flex items-center gap-2 bg-gradient-to-r from-[#d91d24] via-red-600 to-[#b91c1c] text-white font-black text-xs sm:text-sm px-4 py-2 rounded-xl shadow-md shadow-red-600/20">
+                  <Award size={16} className="text-amber-300 shrink-0" />
+                  <span>NABL M(EL)T Accredited & ISO 9001 : 2015 Certified Laboratory</span>
+                </div>
+              </motion.div>
+
+              {/* ── Official Certificate Badges Strip (Home Screen Prominence) ── */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-xs mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 pl-1">
+                    Quality Seals:
+                  </span>
+                  <img
+                    src="/images/accreditations-strip.jpg"
+                    alt="Accreditations: NABL LABS, ISO 9001:2015, IAF, KAB KAB-QC-88"
+                    className="h-8 sm:h-9 object-contain"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60 shrink-0">
+                  <ShieldCheck size={14} className="text-emerald-600" />
+                  <span>Reports Valid Globally & at AIIMS</span>
+                </div>
+              </motion.div>
+
+              {/* Services Strip from Card 1 */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="mb-5"
+              >
+                <div className="flex items-center gap-1.5 text-xs font-black text-[#d91d24] uppercase tracking-wider mb-1.5">
+                  <span>Our Services &gt;&gt;</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-700">
+                  {['Pathology', 'Digital X-Ray', 'ECG', 'Doctor Consultation', 'Health Check-Up Packages', 'Home Sample Collection'].map((svc, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-slate-100/90 hover:bg-slate-200/80 border border-slate-200/80 px-2.5 py-1 rounded-lg transition-colors inline-flex items-center gap-1"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#d91d24]" />
+                      {svc}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Rotating Live Specialist Doctor Chamber Bar */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-slate-50/80 border border-slate-200 rounded-2xl p-3 sm:p-4 mb-5 relative overflow-hidden group hover:border-slate-300 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#07478f] to-blue-700 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-900/20">
+                      <Stethoscope size={20} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-[#d91d24] uppercase tracking-wider block">
+                        Live Specialist Chamber Schedule
+                      </span>
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={curSpec.title}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <p className={`text-sm sm:text-base font-bold font-nunito leading-tight ${curSpec.color}`}>
+                            {curSpec.title}
+                          </p>
+                          <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                            {curSpec.doctor}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  <Link
+                    to="/doctors"
+                    className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-slate-800 hover:text-white bg-white hover:bg-slate-900 px-3 py-1.5 rounded-xl transition-all border border-slate-200 shrink-0"
+                  >
+                    All 19 Doctors <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </motion.div>
+
+              {/* Action Buttons & Phone Hotlines */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.35 }}
+                className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 mb-5"
+              >
+                <Link
+                  to="/book-consultation"
+                  className="group inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#d91d24] via-red-600 to-[#b91c1c] hover:from-red-500 hover:to-red-700 text-white font-black text-sm sm:text-base px-6 py-3.5 rounded-2xl shadow-xl shadow-red-600/25 hover:shadow-red-600/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <CalendarDays size={18} />
+                  <span>Book Doctor Appointment</span>
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
 
                 <Link
-                  to="/doctors"
-                  className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-white bg-slate-100 hover:bg-slate-900 px-3.5 py-2 rounded-xl transition-all border border-slate-200"
+                  to="/book-collection"
+                  className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold text-sm sm:text-base px-5 py-3.5 rounded-2xl shadow-2xs hover:border-slate-300 transition-all"
                 >
-                  All 19 Doctors <ArrowRight size={13} />
+                  <Activity size={18} className="text-[#d91d24]" />
+                  <span>24/7 Home Sample Collection</span>
                 </Link>
+              </motion.div>
+
+              {/* Card 1 Phone Hotlines Strip */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-700 pt-3 border-t border-slate-200">
+                <span className="font-extrabold text-[#d91d24] flex items-center gap-1">
+                  <Phone size={13} />
+                  <span>Direct Hotline:</span>
+                </span>
+                <a href="tel:9733525031" className="font-bold hover:text-[#07478f] transition-colors">
+                  9733525031
+                </a>
+                <span className="text-slate-300">/</span>
+                <a href="tel:9647393949" className="font-bold hover:text-[#07478f] transition-colors">
+                  9647393949
+                </a>
+                <span className="text-slate-300">/</span>
+                <a href="tel:8927790562" className="font-bold hover:text-[#07478f] transition-colors">
+                  8927790562
+                </a>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Action Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-3.5 mb-7"
-            >
-              <Link
-                to="/book-consultation"
-                className="group relative inline-flex items-center gap-2.5 bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-bold text-sm sm:text-base px-6 py-3.5 rounded-2xl shadow-xl shadow-rose-600/25 hover:shadow-rose-600/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            {/* ── Right Column: High-End Diagnostic Centre & Gallery Showcase ── */}
+            <div className="lg:col-span-6 xl:col-span-6 flex justify-center w-full">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="w-full max-w-xl bg-white border-2 border-slate-200/90 rounded-3xl p-4 sm:p-5 shadow-2xl relative flex flex-col justify-between overflow-hidden"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
               >
-                <CalendarDays size={18} />
-                <span>Book Doctor Appointment</span>
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              <Link
-                to="/book-collection"
-                className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-800 font-bold text-sm sm:text-base px-5 py-3.5 rounded-2xl shadow-2xs hover:border-slate-300 transition-all"
-              >
-                <Activity size={18} className="text-rose-600" />
-                <span>24/7 Home Sample Collection</span>
-              </Link>
-            </motion.div>
-
-            {/* Trust Points Matrix */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-200"
-            >
-              {[
-                { label: 'Blood, Urine, Stool, Semen', sub: 'Complete Pathology' },
-                { label: 'EEG & NCV Testing', sub: 'Neurological Lab' },
-                { label: '24-Hr Holter & ECG', sub: 'Cardiology Care' },
-                { label: 'Oxygen Cylinders', sub: 'Available 24x7' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle2 size={15} className="text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-900 leading-tight">{item.label}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{item.sub}</p>
+                {/* Showcase Top Bar */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                    <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                      Featured Diagnostic Facility & Lab
+                    </span>
                   </div>
+
+                  {/* Zoom Lightbox Trigger Button */}
+                  <button
+                    onClick={() => setLightboxOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 hover:bg-[#d91d24] hover:text-white text-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                    title="Click to expand high-resolution view"
+                  >
+                    <Maximize2 size={13} />
+                    <span>Zoom Fullscreen</span>
+                  </button>
+                </div>
+
+                {/* Interactive Category Selector Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5 select-none">
+                  {galleryItems.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setDirection(idx > slideIdx ? 1 : -1)
+                        setSlideIdx(idx)
+                      }}
+                      className={`text-[11px] font-bold px-3 py-1 rounded-xl shrink-0 transition-all cursor-pointer ${
+                        idx === slideIdx
+                          ? 'bg-gradient-to-r from-[#d91d24] to-red-600 text-white shadow-sm scale-102'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60'
+                      }`}
+                    >
+                      {item.tabTitle}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Primary Sliding Viewport */}
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-md group">
+                  <div
+                    onClick={() => setLightboxOpen(true)}
+                    className="block relative h-72 sm:h-84 md:h-96 w-full overflow-hidden cursor-zoom-in select-none"
+                    title="Click to enlarge"
+                  >
+                    <AnimatePresence initial={false} custom={direction} mode="wait">
+                      <motion.div
+                        key={slideIdx}
+                        custom={direction}
+                        variants={slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        className="absolute inset-0 w-full h-full"
+                      >
+                        <img
+                          src={curSlide.imageUrl}
+                          alt={curSlide.title}
+                          className="w-full h-full object-cover sm:object-contain bg-slate-950 group-hover:scale-103 transition-transform duration-500 ease-out"
+                        />
+
+                        {/* Top Overlay Tag */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-slate-950/85 text-white border border-white/20 backdrop-blur-md shadow-md">
+                            <Sparkles size={11} className="text-amber-400" />
+                            {curSlide.featuredTag || curSlide.category}
+                          </span>
+
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#d91d24] text-white shadow-md">
+                            <span>Inspect Image</span>
+                          </span>
+                        </div>
+
+                        {/* Bottom Information Caption Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent pt-14 pb-3.5 px-4 sm:px-5 pointer-events-none">
+                          <span className="text-[11px] font-black text-rose-400 uppercase tracking-wider block">
+                            {curSlide.subtitle}
+                          </span>
+                          <h3 className="text-white font-extrabold text-sm sm:text-base leading-snug line-clamp-1 mt-0.5">
+                            {curSlide.title}
+                          </h3>
+                          <p className="text-slate-300 text-xs mt-1 line-clamp-2 leading-relaxed font-normal">
+                            {curSlide.description}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {/* Animated Progress Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-20 overflow-hidden">
+                      <motion.div
+                        key={slideIdx}
+                        initial={{ width: '0%' }}
+                        animate={{ width: isPaused ? '0%' : '100%' }}
+                        transition={{ duration: 5.5, ease: 'linear' }}
+                        className="h-full bg-gradient-to-r from-[#d91d24] to-red-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thumbnail Strip */}
+                <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar py-1 select-none">
+                  {galleryItems.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setDirection(idx > slideIdx ? 1 : -1)
+                        setSlideIdx(idx)
+                      }}
+                      className={`relative w-14 h-10 sm:w-16 sm:h-11 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                        idx === slideIdx
+                          ? 'border-[#d91d24] ring-2 ring-red-500/40 scale-105'
+                          : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-400'
+                      }`}
+                      title={item.title}
+                    >
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Showcase Footer Controls */}
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handlePrev}
+                      aria-label="Previous slide"
+                      className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-[#d91d24] hover:text-white text-slate-700 border border-slate-200 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      aria-label="Next slide"
+                      className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-[#d91d24] hover:text-white text-slate-700 border border-slate-200 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                    <span className="text-[11px] font-mono text-slate-600 ml-1 font-bold">
+                      {slideIdx + 1} / {galleryItems.length}
+                    </span>
+                  </div>
+
+                  <Link
+                    to="/gallery"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#d91d24] text-white text-xs sm:text-sm font-bold shadow-md transition-all active:scale-95"
+                  >
+                    <Images size={14} />
+                    <span>Open Full Gallery</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Infinite Animated Marquee of Hospital & Clinical Affiliations ── */}
+        <div className="relative border-t border-slate-200 bg-white/95 backdrop-blur-md py-3.5 select-none overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 mb-1.5 flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-widest">
+            <span className="flex items-center gap-1.5 text-[#d91d24]">
+              <Award size={13} className="text-[#d91d24]" />
+              Specialists Affiliated With Premier Medical Institutes
+            </span>
+            <span className="hidden sm:inline-block text-slate-400 font-normal">
+              New Life Care Diagnostic Centre • Keranitola, Midnapore
+            </span>
+          </div>
+
+          <div className="flex overflow-hidden relative">
+            <motion.div
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
+              className="flex items-center gap-6 whitespace-nowrap shrink-0"
+            >
+              {[...INSTITUTES, ...INSTITUTES].map((inst, i) => (
+                <div
+                  key={i}
+                  className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:border-slate-400 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d91d24]" />
+                  <span className="text-slate-900 font-bold">{inst.name}</span>
+                  <span className="text-slate-500 text-[10px]">({inst.badge})</span>
                 </div>
               ))}
             </motion.div>
           </div>
+        </div>
+      </section>
 
-          {/* Right Column: Diagnostic Gallery Section (Requested by User) */}
-          <div className="lg:col-span-5 flex justify-center w-full">
+      {/* ── High-Resolution Fullscreen Lightbox Modal ── */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxOpen(false)}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, x: 25 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="w-full max-w-lg bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl relative flex flex-col justify-between"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-5xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col max-h-[92vh]"
             >
-              {/* Gallery Header */}
-              <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
+              {/* Modal Top Header */}
+              <div className="p-4 bg-slate-950 flex items-center justify-between border-b border-slate-800">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shadow-xs">
-                    <Images size={16} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                        Diagnostic & Lab Gallery
-                      </span>
-                      <span className="flex h-2 w-2 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 block leading-tight">
-                      Photo Tour • Switches every 5 seconds
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                    {String(slideIdx + 1).padStart(2, '0')} / {String(galleryItems.length).padStart(2, '0')}
+                  <span className="px-2.5 py-0.5 rounded-md text-xs font-black bg-[#d91d24] text-white">
+                    {curSlide.category}
                   </span>
+                  <h3 className="text-white font-bold text-sm sm:text-base line-clamp-1">
+                    {curSlide.title}
+                  </h3>
                 </div>
-              </div>
-
-              {/* Sliding Photo Viewport (Linked directly to /gallery) */}
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-md group">
-                <Link
-                  to="/gallery"
-                  className="block relative h-64 sm:h-72 md:h-80 w-full overflow-hidden cursor-pointer select-none"
-                  title="Click to explore the Full Gallery"
+                <button
+                  onClick={() => setLightboxOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-red-600 text-white flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <AnimatePresence initial={false} custom={direction} mode="wait">
-                    <motion.div
-                      key={slideIdx}
-                      custom={direction}
-                      variants={slideVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      className="absolute inset-0 w-full h-full"
-                    >
-                      <img
-                        src={curSlide.imageUrl}
-                        alt={curSlide.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
-
-                      {/* Top Badges */}
-                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-950/80 text-white border border-white/20 backdrop-blur-md shadow-md">
-                          <Sparkles size={11} className="text-rose-400" />
-                          {curSlide.category || 'Diagnostic Centre'}
-                        </span>
-
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/20 text-white backdrop-blur-md border border-white/20 group-hover:bg-rose-600 transition-colors">
-                          <Maximize2 size={11} />
-                          <span>View Gallery</span>
-                        </span>
-                      </div>
-
-                      {/* Bottom Caption Overlay */}
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pt-12 pb-3.5 px-4 sm:px-5 pointer-events-none">
-                        <h3 className="text-white font-bold text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-rose-300 transition-colors">
-                          {curSlide.title}
-                        </h3>
-                        {curSlide.description && (
-                          <p className="text-slate-300 text-xs mt-1 line-clamp-2 leading-relaxed">
-                            {curSlide.description}
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* 5-Second Animated Progress Bar */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-20 overflow-hidden">
-                    <motion.div
-                      key={slideIdx}
-                      initial={{ width: '0%' }}
-                      animate={{ width: isPaused ? '0%' : '100%' }}
-                      transition={{ duration: 5, ease: 'linear' }}
-                      className="h-full bg-gradient-to-r from-rose-500 to-red-600"
-                    />
-                  </div>
-                </Link>
+                  <X size={18} />
+                </button>
               </div>
 
-              {/* Interactive Thumbnail Carousel Strip */}
-              <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar py-1 select-none">
-                {galleryItems.map((item, idx) => (
-                  <button
-                    key={item.id || item._id || idx}
-                    onClick={() => {
-                      setDirection(idx > slideIdx ? 1 : -1)
-                      setSlideIdx(idx)
-                    }}
-                    className={`relative w-12 h-9 sm:w-14 sm:h-10 rounded-lg overflow-hidden shrink-0 border transition-all cursor-pointer ${
-                      idx === slideIdx
-                        ? 'border-rose-600 ring-2 ring-rose-600/40 scale-105'
-                        : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-400'
-                    }`}
-                    title={item.title}
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+              {/* Image Container */}
+              <div className="relative flex-1 bg-black flex items-center justify-center overflow-auto p-2">
+                <img
+                  src={curSlide.imageUrl}
+                  alt={curSlide.title}
+                  className="max-h-[68vh] w-auto max-w-full object-contain rounded-xl"
+                />
               </div>
 
-              {/* Bottom Arrows & Gallery Actions (As Requested) */}
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                {/* Arrow Controls at the Bottom */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePrev}
-                    aria-label="Previous photo"
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-700 border border-slate-200 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs"
-                    title="Previous photo"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    aria-label="Next photo"
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-700 border border-slate-200 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs"
-                    title="Next photo"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-
-                  <span className="text-[11px] font-mono text-slate-600 ml-1 font-bold">
-                    {slideIdx + 1} / {galleryItems.length}
-                  </span>
+              {/* Modal Bottom Bar */}
+              <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+                <div>
+                  <p className="font-semibold text-white">{curSlide.subtitle}</p>
+                  <p className="text-slate-400 mt-0.5">{curSlide.description}</p>
                 </div>
-
-                {/* Direct Link to Gallery Section */}
-                <Link
-                  to="/gallery"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-rose-600/20 transition-all active:scale-95"
-                >
-                  <span>Open Gallery</span>
-                  <ArrowRight size={14} />
-                </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    to="/book-collection"
+                    onClick={() => setLightboxOpen(false)}
+                    className="px-4 py-2 bg-[#d91d24] hover:bg-red-700 text-white font-bold rounded-xl transition-colors"
+                  >
+                    Book Home Collection
+                  </Link>
+                  <Link
+                    to="/gallery"
+                    onClick={() => setLightboxOpen(false)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors"
+                  >
+                    View All Gallery
+                  </Link>
+                </div>
               </div>
             </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Infinite Animated Marquee of Hospital & Clinic Affiliations */}
-      <div className="relative border-t border-slate-200 bg-white/90 backdrop-blur-md py-3.5 select-none overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 mb-1.5 flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-widest">
-          <span className="flex items-center gap-1.5 text-rose-700">
-            <Award size={13} className="text-rose-600" />
-            Specialists Affiliated With Renowned Hospitals & Institutes
-          </span>
-          <span className="hidden sm:inline-block text-slate-400 font-normal">
-            New Life Care Diagnostic Centre • Midnapore Town
-          </span>
-        </div>
-
-        {/* Marquee Track */}
-        <div className="flex overflow-hidden relative">
-          <motion.div
-            animate={{ x: ['0%', '-50%'] }}
-            transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
-            className="flex items-center gap-6 whitespace-nowrap shrink-0"
-          >
-            {[...INSTITUTES, ...INSTITUTES].map((inst, i) => (
-              <div
-                key={i}
-                className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:border-slate-400 transition-colors"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                <span className="text-slate-900 font-bold">{inst.name}</span>
-                <span className="text-slate-500 text-[10px]">({inst.badge})</span>
-              </div>
-            ))}
           </motion.div>
-        </div>
-      </div>
-    </section>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

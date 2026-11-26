@@ -413,7 +413,7 @@ export default function DoctorsPage() {
         <link rel="canonical" href="https://newlifecaredc.in/doctors" />
       </Helmet>
 
-      <main className="overflow-x-hidden bg-slate-50 min-h-screen">
+      <main className="overflow-x-hidden bg-gradient-to-b from-[#ebf5fe]/40 via-white/50 to-[#ebf5fe]/60 min-h-screen">
         <PageHero
           title="Our Expert Doctors"
           subtitle="A dedicated panel of experienced specialists committed to your health and well-being."

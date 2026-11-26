@@ -82,7 +82,7 @@ const TOP_SPECIALISTS = [
 
 export default function DoctorAffiliationSpotlight() {
   return (
-    <section className="py-16 md:py-24 bg-white relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-white/70 via-[#ebf5fe]/80 to-white/70 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

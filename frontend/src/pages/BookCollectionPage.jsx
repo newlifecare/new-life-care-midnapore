@@ -238,7 +238,7 @@ export default function BookCollectionPage() {
         breadcrumb={[{ label: 'Home Collection' }]}
       />
 
-      <main className="overflow-x-hidden bg-slate-50 min-h-screen py-12 px-4 sm:px-6">
+      <main className="overflow-x-hidden bg-gradient-to-b from-[#ebf5fe]/60 via-white/60 to-[#ebf5fe]/80 min-h-screen py-12 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
 
           {success ? (

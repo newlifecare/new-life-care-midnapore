@@ -4,6 +4,20 @@ import { uploadImageBuffer, deleteCloudinaryImage } from '../utils/cloudinary.js
 // Initial gallery items showcasing actual New Life Care facilities, equipment & doctors
 const DEFAULT_GALLERY = [
   {
+    title: 'Our Advanced Laboratory Machines & 4-Story Diagnostic Centre',
+    description: 'NABL Accredited & ISO 9001:2015 Certified Centre in Keranitola featuring state-of-the-art robotic biochemistry and hematology analyzers.',
+    category: 'Equipment',
+    imageUrl: '/images/official-centre-poster.jpg',
+    featured: true,
+  },
+  {
+    title: 'Government & International Quality Accreditations',
+    description: 'Official seals: NABL Medical Labs, ISO 9001:2015 Pathology, IAF Multilateral Recognition, and KAB Korea Accreditation Board compliance.',
+    category: 'Accreditation',
+    imageUrl: '/images/header-banner.jpg',
+    featured: true,
+  },
+  {
     title: 'NABL Accredited Pathology Laboratory Floor',
     description: 'Fully computerized pathology testing floor featuring automated chemistry analyzers, digital microscopes, and neuro-investigations setup.',
     category: 'Equipment',

@@ -90,13 +90,13 @@ export default function Navbar() {
               <img
                 src="/images/logo.jpg"
                 alt="New Life Care Diagnostic Centre Logo"
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-slate-200 shadow-sm group-hover:scale-105 transition-transform bg-white"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-[#d91d24] shadow-sm group-hover:scale-105 transition-transform bg-white p-0.5"
               />
               <div className="leading-tight">
-                <span className="font-extrabold text-slate-900 text-base sm:text-lg font-nunito block leading-tight">
-                  New <span className="text-rose-600">LIFE CARE</span>
+                <span className="font-black text-[#07478f] text-base sm:text-lg font-nunito block leading-tight">
+                  New Life Care
                 </span>
-                <span className="text-[11px] sm:text-xs font-bold text-sky-600 tracking-wide block leading-none">
+                <span className="text-[11px] sm:text-xs font-black text-[#d91d24] tracking-wider block leading-none uppercase">
                   Diagnostic Centre
                 </span>
               </div>

@@ -34,7 +34,7 @@ export default function InteractiveFaq() {
   const [openIdx, setOpenIdx] = useState(0)
 
   return (
-    <section className="py-16 md:py-24 bg-slate-50 relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-[#f0f7fe]/90 via-[#ebf5ff]/70 to-[#f0f7fe]/90 relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
