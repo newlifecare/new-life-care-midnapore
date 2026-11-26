@@ -16,6 +16,7 @@ const testSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    default: 'Pathology',
   },
   price: {
     type: Number,
@@ -41,10 +42,22 @@ const testSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  testType: {
+    type: String,
+    default: 'Test', // 'Test', 'Profile', 'Package', 'Template'
+  },
+  deptName: {
+    type: String,
+    default: '',
+  },
+  status: {
+    type: String,
+    default: 'Active',
+  },
   source: {
     type: String,
     enum: ['lis', 'manual', 'mock'],
-    default: 'mock',
+    default: 'lis',
   },
   lastSyncedAt: {
     type: Date,
@@ -57,4 +70,4 @@ const testSchema = new mongoose.Schema({
 });
 
 export const TestItem = mongoose.model('TestItem', testSchema);
-
+export default TestItem;

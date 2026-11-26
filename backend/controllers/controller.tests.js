@@ -1,35 +1,22 @@
-import lisClient, { isLisConfigured } from '../utils/lisClient.js';
 import { TestItem } from '../models/model.test.js';
 import { syncTestsFromLIS, getSyncStatus } from '../utils/scheduler.sync.js';
+import { fetchLifeCarePrices, isLifeCareConfigured } from '../utils/service.lifecareserver.js';
 
-// ─── DUMMY DATA (used until LIS API is provided or seeded in DB) ───────────────
+// Fallback dummy tests if LIS server is ever unreachable on initial boot
 const DUMMY_TESTS = [
-  { testCode: 'CBC', id: 'CBC', name: 'Complete Blood Count (CBC)', category: 'Pathology', price: 250, turnaround: '4-6 hours', sampleType: 'Blood' },
-  { testCode: 'LFT', id: 'LFT', name: 'Liver Function Test (LFT)', category: 'Pathology', price: 450, turnaround: '6-8 hours', sampleType: 'Blood' },
-  { testCode: 'KFT', id: 'KFT', name: 'Kidney Function Test (KFT)', category: 'Pathology', price: 500, turnaround: '6-8 hours', sampleType: 'Blood' },
-  { testCode: 'LIPID', id: 'LIPID', name: 'Lipid Profile', category: 'Pathology', price: 350, turnaround: '6-8 hours', sampleType: 'Blood' },
-  { testCode: 'THYROID', id: 'THYROID', name: 'Thyroid Function (T3, T4, TSH)', category: 'Pathology', price: 600, turnaround: '8-12 hours', sampleType: 'Blood' },
-  { testCode: 'SUGAR_F', id: 'SUGAR_F', name: 'Blood Sugar (Fasting)', category: 'Pathology', price: 80, turnaround: '1-2 hours', sampleType: 'Blood' },
-  { testCode: 'SUGAR_PP', id: 'SUGAR_PP', name: 'Blood Sugar (Post-Prandial)', category: 'Pathology', price: 80, turnaround: '1-2 hours', sampleType: 'Blood' },
-  { testCode: 'HBA1C', id: 'HBA1C', name: 'HbA1c (Glycated Haemoglobin)', category: 'Pathology', price: 400, turnaround: '4-6 hours', sampleType: 'Blood' },
-  { testCode: 'URINE_R', id: 'URINE_R', name: 'Urine Routine & Microscopy', category: 'Pathology', price: 120, turnaround: '2-4 hours', sampleType: 'Urine' },
-  { testCode: 'WIDAL', id: 'WIDAL', name: 'Widal Test', category: 'Pathology', price: 150, turnaround: '4-6 hours', sampleType: 'Blood' },
-  { testCode: 'DENGUE_NS1', id: 'DENGUE_NS1', name: 'Dengue NS1 Antigen', category: 'Pathology', price: 500, turnaround: '4-6 hours', sampleType: 'Blood' },
-  { testCode: 'MALARIA', id: 'MALARIA', name: 'Malaria Antigen Test', category: 'Pathology', price: 200, turnaround: '1-2 hours', sampleType: 'Blood' },
-  { testCode: 'USG_ABDOMEN', id: 'USG_ABDOMEN', name: 'USG Abdomen & Pelvis', category: 'USG', price: 800, turnaround: 'Immediate', sampleType: 'Non-invasive' },
-  { testCode: 'USG_WHOLE', id: 'USG_WHOLE', name: 'USG Whole Abdomen', category: 'USG', price: 1000, turnaround: 'Immediate', sampleType: 'Non-invasive' },
-  { testCode: 'ECHO', id: 'ECHO', name: 'Echocardiography', category: 'Cardiology', price: 1200, turnaround: 'Immediate', sampleType: 'Non-invasive' },
-  { testCode: 'ECG_12', id: 'ECG_12', name: 'Computerized ECG (12 Lead)', category: 'Cardiology', price: 150, turnaround: 'Immediate', sampleType: 'Non-invasive' },
-  { testCode: 'HOLTER', id: 'HOLTER', name: '24-Hour Holter Monitoring', category: 'Cardiology', price: 2500, turnaround: '24 hours', sampleType: 'Wearable' },
-  { testCode: 'XRAY_CHEST', id: 'XRAY_CHEST', name: 'Digital X-Ray Chest', category: 'Radiology', price: 300, turnaround: 'Immediate', sampleType: 'Digital X-Ray' },
-  { testCode: 'XRAY_LS', id: 'XRAY_LS', name: 'Digital X-Ray Lumbo-Sacral Spine', category: 'Radiology', price: 400, turnaround: 'Immediate', sampleType: 'Digital X-Ray' },
-  { testCode: 'PFT', id: 'PFT', name: 'Pulmonary Function Test (PFT)', category: 'Pulmonology', price: 500, turnaround: 'Immediate', sampleType: 'Spirometry' },
-  { testCode: 'EEG', id: 'EEG', name: 'Electroencephalogram (EEG)', category: 'Neurology', price: 1500, turnaround: 'Same day', sampleType: 'Digital Recording' },
-  { testCode: 'NCV', id: 'NCV', name: 'Nerve Conduction Velocity (NCV)', category: 'Neurology', price: 2000, turnaround: 'Same day', sampleType: 'Electrophysiology' },
-  { testCode: 'ENDOSCOPY', id: 'ENDOSCOPY', name: 'Upper GI Video Endoscopy', category: 'Gastroenterology', price: 2200, turnaround: 'Immediate', sampleType: 'Endoscopic' },
-  { testCode: 'SEMEN_ANALYSIS', id: 'SEMEN_ANALYSIS', name: 'Semen Analysis & Examination', category: 'Pathology', price: 300, turnaround: 'Same day', sampleType: 'Semen' },
-  { testCode: 'STOOL_RE', id: 'STOOL_RE', name: 'Stool Routine & Occult Blood', category: 'Pathology', price: 150, turnaround: '4-6 hours', sampleType: 'Stool' },
-  { testCode: 'SPUTUM_AFB', id: 'SPUTUM_AFB', name: 'Sputum for AFB (TB Screening)', category: 'Pathology', price: 200, turnaround: 'Same day', sampleType: 'Sputum' },
+  { testCode: 'CBC', id: 'CBC', name: 'Complete Blood Count (CBC)', category: 'Haematology', price: 250, turnaround: '4-6 hours', sampleType: 'Blood', testType: 'Test' },
+  { testCode: 'LFT', id: 'LFT', name: 'Liver Function Test (LFT)', category: 'Biochemistry', price: 450, turnaround: '6-8 hours', sampleType: 'Blood', testType: 'Profile' },
+  { testCode: 'KFT', id: 'KFT', name: 'Kidney Function Test (KFT)', category: 'Biochemistry', price: 500, turnaround: '6-8 hours', sampleType: 'Blood', testType: 'Profile' },
+  { testCode: 'LIPID', id: 'LIPID', name: 'Lipid Profile', category: 'Biochemistry', price: 350, turnaround: '6-8 hours', sampleType: 'Blood', testType: 'Profile' },
+  { testCode: 'THYROID', id: 'THYROID', name: 'Thyroid Function (T3, T4, TSH)', category: 'Biochemistry', price: 600, turnaround: '8-12 hours', sampleType: 'Blood', testType: 'Profile' },
+  { testCode: 'SUGAR_F', id: 'SUGAR_F', name: 'Blood Sugar (Fasting)', category: 'Biochemistry', price: 80, turnaround: '1-2 hours', sampleType: 'Blood', testType: 'Test' },
+  { testCode: 'HBA1C', id: 'HBA1C', name: 'HbA1c (Glycated Haemoglobin)', category: 'Biochemistry', price: 400, turnaround: '4-6 hours', sampleType: 'Blood', testType: 'Test' },
+  { testCode: 'URINE_R', id: 'URINE_R', name: 'Urine Routine & Microscopy', category: 'Haematology', price: 120, turnaround: '2-4 hours', sampleType: 'Urine', testType: 'Template' },
+  { testCode: 'ECG_12', id: 'ECG_12', name: 'Computerized ECG (12 Lead)', category: 'Cardiology', price: 150, turnaround: 'Immediate', sampleType: 'Non-invasive', testType: 'Test' },
+  { testCode: 'HOLTER', id: 'HOLTER', name: '24-Hour Holter Monitoring', category: 'Cardiology', price: 2500, turnaround: '24 hours', sampleType: 'Wearable', testType: 'Test' },
+  { testCode: 'XRAY_CHEST', id: 'XRAY_CHEST', name: 'Digital X-Ray Chest', category: 'Radiology', price: 300, turnaround: 'Immediate', sampleType: 'Digital X-Ray', testType: 'Test' },
+  { testCode: 'EEG', id: 'EEG', name: 'Electroencephalogram (EEG)', category: 'Neurology', price: 1500, turnaround: 'Same day', sampleType: 'Digital Recording', testType: 'Test' },
+  { testCode: 'NCV', id: 'NCV', name: 'Nerve Conduction Velocity (NCV)', category: 'Neurology', price: 2000, turnaround: 'Same day', sampleType: 'Electrophysiology', testType: 'Test' },
 ];
 
 const DUMMY_PACKAGES = [
@@ -44,6 +31,7 @@ const DUMMY_PACKAGES = [
     description: 'Comprehensive health screening covering 47 key diagnostic parameters for routine wellness.',
     popular: true,
     isPackage: true,
+    testType: 'Package',
   },
   {
     id: 'PKG_HEALTH_ADV_12',
@@ -56,157 +44,149 @@ const DUMMY_PACKAGES = [
     description: 'Detailed clinical evaluation for chronic disease prevention and vital organ assessments.',
     popular: false,
     isPackage: true,
-  },
-  {
-    id: 'PKG_DIABETIC_59',
-    testCode: 'PKG_DIABETIC_59',
-    name: 'Diabetic Profile (59 Tests)',
-    category: 'Packages',
-    price: 2999,
-    originalPrice: 4500,
-    tests: ['Fasting Glucose', 'PP Glucose', 'HbA1c Glycated Hemoglobin', 'Average Blood Glucose', 'Complete Renal Function', 'Lipid Screen', 'Microalbuminuria', 'CBC', 'Serum Electrolytes'],
-    description: 'Specialized 59-test diabetic and cardiovascular wellness profile for comprehensive glycemic control.',
-    popular: true,
-    isPackage: true,
-  },
-  {
-    id: 'PKG_CANCER_7',
-    testCode: 'PKG_CANCER_7',
-    name: 'Cancer Marker Profile (7 Tests)',
-    category: 'Packages',
-    price: 2999,
-    originalPrice: 5000,
-    tests: ['CEA (Carcinoembryonic Antigen)', 'AFP (Alpha Fetoprotein)', 'CA 125', 'PSA (Total)', 'CA 19-9', 'Beta HCG', 'CBC with Peripheral Smear'],
-    description: 'Targeted multi-organ cancer biomarker profile screening for early detection and oncological review.',
-    popular: false,
-    isPackage: true,
+    testType: 'Package',
   },
 ];
 
 /**
- * Seed initial test catalogue into MongoDB if empty or sync updated packages
+ * Seed initial test catalogue into MongoDB if empty
  */
 export const seedDefaultTests = async () => {
   try {
-    for (const t of DUMMY_TESTS) {
-      await TestItem.updateOne(
-        { testCode: t.testCode },
-        { $set: { ...t, isPackage: false, source: 'mock' } },
-        { upsert: true }
-      );
+    const count = await TestItem.countDocuments().catch(() => 0);
+    if (count === 0) {
+      console.log('🧪 Seeding initial test cache and triggering live LIS sync...');
+      await syncTestsFromLIS().catch((err) => console.warn('LIS initial sync warning:', err.message));
     }
-    for (const p of DUMMY_PACKAGES) {
-      await TestItem.updateOne(
-        { testCode: p.id },
-        {
-          $set: {
-            testCode: p.id,
-            name: p.name,
-            category: 'Packages',
-            price: p.price,
-            originalPrice: p.originalPrice,
-            description: p.description,
-            includes: p.tests,
-            isPackage: true,
-            popular: p.popular,
-            source: 'mock',
-          },
-        },
-        { upsert: true }
-      );
-    }
-    console.log('🧪 Seeded/synced official tests & packages into MongoDB.');
   } catch (error) {
-    console.warn('⚠️ Could not seed tests into MongoDB:', error.message);
+    console.warn('⚠️ seedDefaultTests warning:', error.message);
   }
 };
 
-// ─── Get Test Catalog ─────────────────────────────────────────────────────────
+/**
+ * GET /api/tests
+ * Query parameters:
+ *  - search: string (matches test name, code, or department)
+ *  - type: 'Test' | 'Profile' | 'Package' | 'Template' | 'All'
+ *  - category: 'Pathology', 'Haematology', 'Biochemistry', etc.
+ */
 export const getTestCatalog = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, type, search } = req.query;
 
-    // 1. If Main LIS server is configured, try proxying request
-    if (isLisConfigured()) {
-      try {
-        const lisResponse = await lisClient.get('/api/v1/tests/catalog', { params: { category } });
-        if (lisResponse.data?.data) {
-          return res.json({ success: true, data: lisResponse.data.data, source: 'lis' });
-        }
-      } catch (lisError) {
-        console.warn('[LIS Gateway] LIS catalog unreachable, falling back to local database:', lisError.message);
-      }
+    const filter = {};
+
+    // Filter by type: 'Test', 'Profile', 'Package', 'Template'
+    if (type && type.toLowerCase() !== 'all') {
+      filter.testType = new RegExp(`^${type}$`, 'i');
     }
 
-    // 2. Query from local MongoDB
-    try {
-      const filter = { isPackage: false };
-      if (category && category.toLowerCase() !== 'all') {
-        filter.category = new RegExp(`^${category}$`, 'i');
-      }
-      const dbTests = await TestItem.find(filter).lean();
-      if (dbTests.length > 0) {
-        return res.json({
-          success: true,
-          data: dbTests.map(t => ({ ...t, id: t.testCode || t._id })),
-          source: 'database',
-        });
-      }
-    } catch (_) {}
-
-    // 3. Fallback to mock catalog
-    let tests = DUMMY_TESTS;
+    // Filter by category
     if (category && category.toLowerCase() !== 'all') {
-      tests = tests.filter(t => t.category.toLowerCase() === category.toLowerCase());
+      filter.category = new RegExp(`^${category}$`, 'i');
     }
 
-    return res.json({ success: true, data: tests, source: 'mock' });
+    // Search by keyword
+    if (search && search.trim()) {
+      filter.$or = [
+        { name: new RegExp(search.trim(), 'i') },
+        { testCode: new RegExp(search.trim(), 'i') },
+        { deptName: new RegExp(search.trim(), 'i') },
+      ];
+    }
+
+    let dbTests = await TestItem.find(filter).sort({ name: 1 }).lean();
+
+    // If database has 0 items (initial setup), attempt live sync immediately
+    if (dbTests.length === 0 && (!search || search.length < 2)) {
+      try {
+        await syncTestsFromLIS();
+        dbTests = await TestItem.find(filter).sort({ name: 1 }).lean();
+      } catch (_) {}
+    }
+
+    if (dbTests.length > 0) {
+      const formatted = dbTests.map((t) => ({
+        _id: t._id,
+        id: t.testCode || t._id,
+        testCode: t.testCode,
+        name: t.name,
+        price: t.price,
+        originalPrice: t.originalPrice,
+        category: t.category,
+        type: t.testType || (t.isPackage ? 'Package' : 'Test'),
+        Type: t.testType || (t.isPackage ? 'Package' : 'Test'),
+        deptName: t.deptName || '',
+        status: t.status || 'Active',
+        turnaround: t.turnaround || 'Same Day',
+        sampleType: t.sampleType || 'Blood',
+        description: t.description || '',
+        includes: t.includes || [],
+        isPackage: Boolean(t.isPackage),
+      }));
+
+      return res.json({
+        success: true,
+        count: formatted.length,
+        data: formatted,
+        source: 'database',
+      });
+    }
+
+    // Fallback if DB completely empty
+    return res.json({
+      success: true,
+      count: DUMMY_TESTS.length,
+      data: DUMMY_TESTS,
+      source: 'mock',
+    });
   } catch (error) {
-    console.error('[getTestCatalog]', error);
+    console.error('[getTestCatalog] Error:', error);
     return res.status(500).json({ success: false, message: 'Error fetching test catalog' });
   }
 };
 
-// ─── Get Health Packages ──────────────────────────────────────────────────────
+/**
+ * GET /api/tests/packages
+ * Returns Profiles and Packages
+ */
 export const getHealthPackages = async (req, res) => {
   try {
-    if (isLisConfigured()) {
-      try {
-        const lisResponse = await lisClient.get('/api/v1/packages');
-        if (lisResponse.data?.data) {
-          return res.json({ success: true, data: lisResponse.data.data, source: 'lis' });
-        }
-      } catch (lisError) {
-        console.warn('[LIS Gateway] LIS packages unreachable, falling back to database:', lisError.message);
-      }
+    const filter = {
+      $or: [{ isPackage: true }, { testType: 'Package' }, { testType: 'Profile' }],
+    };
+
+    let pkgs = await TestItem.find(filter).sort({ price: -1 }).lean();
+
+    if (pkgs.length > 0) {
+      return res.json({
+        success: true,
+        count: pkgs.length,
+        data: pkgs.map((p) => ({
+          _id: p._id,
+          id: p.testCode || p._id,
+          testCode: p.testCode,
+          name: p.name,
+          price: p.price,
+          originalPrice: p.originalPrice || Math.round(p.price * 1.3),
+          description: p.description || '',
+          tests: p.includes && p.includes.length > 0 ? p.includes : [p.name],
+          type: p.testType || 'Package',
+          Type: p.testType || 'Package',
+        })),
+        source: 'database',
+      });
     }
 
-    // Query from local DB
-    try {
-      const dbPkgs = await TestItem.find({ isPackage: true }).lean();
-      if (dbPkgs.length > 0) {
-        return res.json({
-          success: true,
-          data: dbPkgs.map(p => ({
-            id: p.testCode || p._id,
-            name: p.name,
-            price: p.price,
-            originalPrice: p.originalPrice,
-            description: p.description,
-            tests: p.includes || [],
-          })),
-          source: 'database',
-        });
-      }
-    } catch (_) {}
-
-    return res.json({ success: true, data: DUMMY_PACKAGES, source: 'mock' });
+    return res.json({ success: true, count: DUMMY_PACKAGES.length, data: DUMMY_PACKAGES, source: 'mock' });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Error fetching packages' });
   }
 };
 
-// ─── Manual LIS Sync Trigger (Admin only) ──────────────────────────────────────
+/**
+ * POST /api/tests/sync (Admin only or system trigger)
+ */
 export const triggerManualSync = async (req, res) => {
   try {
     const result = await syncTestsFromLIS();
@@ -221,66 +201,46 @@ export const triggerManualSync = async (req, res) => {
   }
 };
 
-// ─── Get Sync Status (Admin only) ─────────────────────────────────────────────
 export const getSyncInfo = (req, res) => {
   return res.json({ success: true, data: getSyncStatus() });
 };
 
-// ─── Create Test / Package (Admin only) ────────────────────────────────────────
 export const createTestItem = async (req, res) => {
   try {
-    const { name, category, price, originalPrice, turnaround, sampleType, description, includes, isPackage } = req.body;
-
-    if (!name || !category || price === undefined) {
-      return res.status(400).json({ success: false, message: 'Name, category, and price are required' });
+    const { name, category, price, testType, deptName } = req.body;
+    if (!name || price === undefined) {
+      return res.status(400).json({ success: false, message: 'Name and price are required' });
     }
-
-    const testCode = req.body.testCode || `TST_${Date.now().toString(36).toUpperCase()}`;
-
+    const testCode = req.body.testCode || `T_${Date.now().toString(36).toUpperCase()}`;
     const item = new TestItem({
+      ...req.body,
       testCode,
-      name,
-      category,
       price: Number(price),
-      originalPrice: originalPrice ? Number(originalPrice) : undefined,
-      turnaround: turnaround || 'Same Day',
-      sampleType: sampleType || 'Blood',
-      description: description || '',
-      includes: Array.isArray(includes) ? includes : (includes ? [includes] : []),
-      isPackage: Boolean(isPackage),
+      testType: testType || 'Test',
+      deptName: deptName || '',
       source: 'manual',
     });
-
     await item.save();
-
-    return res.status(201).json({ success: true, message: 'Test item created successfully', data: item });
+    return res.status(201).json({ success: true, data: item });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ─── Update Test / Package (Admin only) ────────────────────────────────────────
 export const updateTestItem = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = { ...req.body, source: 'manual', lastSyncedAt: new Date() };
-
-    const item = await TestItem.findByIdAndUpdate(id, updateData, { new: true });
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Test item not found' });
-    }
-
-    return res.json({ success: true, message: 'Test item updated successfully', data: item });
+    const item = await TestItem.findByIdAndUpdate(req.params.id, { ...req.body, lastSyncedAt: new Date() }, { new: true });
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+    return res.json({ success: true, data: item });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// ─── Delete Test / Package (Admin only) ────────────────────────────────────────
 export const deleteTestItem = async (req, res) => {
   try {
     await TestItem.findByIdAndDelete(req.params.id);
-    return res.json({ success: true, message: 'Test item deleted successfully' });
+    return res.json({ success: true, message: 'Deleted successfully' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

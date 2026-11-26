@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { ShieldCheck, Lock, Eye, EyeOff, KeyRound, ArrowRight, HeartPulse } from 'lucide-react'
+import { ShieldCheck, Lock, Eye, EyeOff, KeyRound, ArrowRight, HeartPulse, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import PageTransition from '../components/PageTransition'
 import { loginAdmin } from '../services/api'
@@ -12,13 +12,15 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const isSessionExpired = new URLSearchParams(location.search).get('expired') === 'true'
 
   useEffect(() => {
-    // If already logged in, redirect to dashboard
-    if (localStorage.getItem('nlc_admin_token')) {
+    // If already logged in and not redirected due to expiration, go to dashboard
+    if (!isSessionExpired && localStorage.getItem('nlc_admin_token')) {
       navigate('/admin/dashboard')
     }
-  }, [navigate])
+  }, [navigate, isSessionExpired])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -77,6 +79,15 @@ export default function AdminLoginPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/60 border border-slate-100"
           >
+            {isSessionExpired && (
+              <div className="flex items-center gap-3 p-3.5 bg-amber-50 rounded-2xl border border-amber-200 mb-6 text-amber-800">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <p className="text-xs font-medium leading-tight">
+                  Your administrator session has expired or authentication was required. Please log in again to continue.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 p-3 bg-sky-50 rounded-2xl border border-sky-100 mb-6">
               <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0" />
               <p className="text-xs text-sky-800 leading-tight">

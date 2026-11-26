@@ -1,205 +1,216 @@
-import lisClient, { isLisConfigured } from '../utils/lisClient.js';
+import crypto from 'crypto';
+import { OtpTicket } from '../models/model.otpticket.js';
+import { verifyLifeCareReport } from '../utils/service.lifecareserver.js';
 
-// ─── DUMMY REPORT GENERATOR ───────────────────────────────────────────────────
-const generateMockReports = (patientId, phone) => {
-  const displayId = patientId || `PT-${phone ? phone.slice(-4) : '2024'}`;
-  const today = new Date().toISOString().split('T')[0];
+const MAX_OTP_ATTEMPTS = 3;
 
-  return {
-    patientId: displayId,
-    patientName: 'Ramesh Sen',
-    phone: phone || '9733525031',
-    reports: [
-      {
-        _id: 'RPT-1001',
-        reportId: 'RPT-1001',
-        testName: 'Complete Blood Count (CBC)',
-        testDate: today,
-        reportDate: today,
-        status: 'ready',
-        verifiedBy: 'Consultant Pathologist (New Life Care)',
-        downloadUrl: '/api/reports/download/RPT-1001',
-        results: [
-          { parameter: 'Haemoglobin', value: '14.2', unit: 'g/dL', refRange: '13.0 – 17.0', flag: 'Normal' },
-          { parameter: 'Total WBC Count', value: '7,400', unit: '/µL', refRange: '4,000 – 11,000', flag: 'Normal' },
-          { parameter: 'RBC Count', value: '4.9', unit: 'million/µL', refRange: '4.5 – 5.5', flag: 'Normal' },
-          { parameter: 'Platelets', value: '2.4', unit: 'Lakh/µL', refRange: '1.5 – 4.5', flag: 'Normal' },
-          { parameter: 'Neutrophils', value: '64', unit: '%', refRange: '50 – 70', flag: 'Normal' },
-          { parameter: 'Lymphocytes', value: '28', unit: '%', refRange: '20 – 40', flag: 'Normal' },
-          { parameter: 'ESR (Westergren)', value: '12', unit: 'mm/1st hr', refRange: '0 – 15', flag: 'Normal' },
-        ],
-      },
-      {
-        _id: 'RPT-1002',
-        reportId: 'RPT-1002',
-        testName: 'Thyroid Function Test (TSH, Free T3, Free T4)',
-        testDate: today,
-        reportDate: today,
-        status: 'ready',
-        verifiedBy: 'Consultant Pathologist (New Life Care)',
-        downloadUrl: '/api/reports/download/RPT-1002',
-        results: [
-          { parameter: 'TSH (Ultrasensitive)', value: '2.45', unit: 'µIU/mL', refRange: '0.4 – 4.2', flag: 'Normal' },
-          { parameter: 'Free T3', value: '3.1', unit: 'pg/mL', refRange: '2.0 – 4.4', flag: 'Normal' },
-          { parameter: 'Free T4', value: '1.24', unit: 'ng/dL', refRange: '0.93 – 1.70', flag: 'Normal' },
-        ],
-      },
-      {
-        _id: 'RPT-1003',
-        reportId: 'RPT-1003',
-        testName: 'HbA1c & Blood Sugar Fasting',
-        testDate: today,
-        reportDate: today,
-        status: 'processing',
-        verifiedBy: 'Processing at Main Laboratory',
-        downloadUrl: null,
-        results: [],
-      },
-    ],
-  };
+const STATUS_MESSAGES = {
+  REPORT_READY: 'Your report is ready! An OTP has been sent to your registered mobile number.',
+  REPORT_PENDING: 'Your report is being processed in our automated laboratory. Please check back later.',
+  PAYMENT_PENDING: 'Payment information pending. Please contact New Life Care reception at 9733525031.',
+  NOT_FOUND: 'No record found matching the details. Please double-check your Registration / Mobile number and collection date.',
+  MULTIPLE_FOUND: 'Multiple patient records match these details. Please contact the laboratory reception at 9733525031.',
+  REQUEST_EMPTY: 'Please provide either Registration Number or 10-digit Mobile number and Collection Date.',
+  AUTH_FAIL: 'Authentication error connecting to LIS server. Please contact reception.',
+  TECH_FAIL: 'The laboratory server encountered a temporary technical issue. Please try again shortly.',
 };
 
-// ─── Fetch Patient Reports (via LIS Gateway) ──────────────────────────────────
+/**
+ * Step 1: Verify patient report details with LIS Main Server.
+ * POST /api/reports/verify or GET /api/reports/lookup
+ */
+export const verifyReportLookup = async (req, res) => {
+  try {
+    const data = req.method === 'POST' ? req.body : req.query;
+    const { regNo, mobile, phone, patientId, collectionDate: rawDate } = data;
+
+    const resolvedRegNo = regNo || patientId;
+    const resolvedMobile = mobile || phone;
+
+    if (!resolvedRegNo && !resolvedMobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide either your Bill / Registration Number or 10-digit Mobile Number.',
+      });
+    }
+
+    if (!rawDate || !rawDate.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Collection Date is required (format: YYYY-MM-DD).',
+      });
+    }
+
+    const collectionDate = rawDate.trim();
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(collectionDate)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid date format. Please select date in YYYY-MM-DD format (e.g. 2026-11-25).',
+      });
+    }
+
+    // Call New Life Care LIS server
+    const lisResponse = await verifyLifeCareReport({
+      regNo: resolvedRegNo ? String(resolvedRegNo).trim() : undefined,
+      mobile: resolvedMobile ? String(resolvedMobile).trim() : undefined,
+      collectionDate,
+    });
+
+    const status = lisResponse?.status || 'NOT_FOUND';
+    const fallbackMessage = STATUS_MESSAGES[status] || STATUS_MESSAGES.TECH_FAIL;
+    const message = lisResponse?.message && lisResponse.message.trim() ? lisResponse.message : fallbackMessage;
+
+    // ── REPORT_READY: Secure OTP Lockbox ─────────────────────────────────────
+    if (status === 'REPORT_READY') {
+      const otpHash = lisResponse?.otpHash ? String(lisResponse.otpHash).trim() : null;
+      const reportUrl = lisResponse?.reportUrl ? String(lisResponse.reportUrl).trim() : null;
+
+      if (!otpHash || !reportUrl) {
+        console.error('[verifyReport] LIS returned REPORT_READY but otpHash or reportUrl missing.');
+        return res.status(502).json({
+          success: false,
+          message: 'The laboratory server confirmed your report is ready, but secure download data was missing. Please contact reception at 9733525031.',
+        });
+      }
+
+      // Generate a one-time random ticket ID
+      const ticketId = crypto.randomBytes(24).toString('hex');
+
+      await OtpTicket.create({
+        ticketId,
+        otp: otpHash,
+        reportUrl,
+        status: 'REPORT_READY',
+        message,
+        regNo: resolvedRegNo || '',
+        mobile: resolvedMobile || '',
+        collectionDate,
+      });
+
+      console.log(`[OTP Lockbox] Ticket created for ${resolvedRegNo || resolvedMobile} -> ticketId: ${ticketId}`);
+
+      // Return ONLY ticketId. reportUrl and otpHash NEVER leave the server.
+      return res.json({
+        success: true,
+        status: 'REPORT_READY',
+        requiresOtp: true,
+        ticketId,
+        message,
+        qrSRC: lisResponse?.qrSRC || '',
+      });
+    }
+
+    // ── Other statuses: pass through user-friendly status message ────────────
+    return res.json({
+      success: false,
+      status,
+      message,
+      qrSRC: lisResponse?.qrSRC || '',
+      requiresOtp: false,
+    });
+  } catch (error) {
+    console.error('[verifyReportLookup] Error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Could not connect to the diagnostic server. Please try again or call reception at 9733525031.',
+    });
+  }
+};
+
+/**
+ * Step 2: Verify Patient OTP & Release Report URL.
+ * POST /api/reports/verify-otp
+ * Body: { ticketId, otp }
+ */
+export const verifyReportOtp = async (req, res) => {
+  try {
+    const { ticketId, otp } = req.body;
+
+    if (!ticketId || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket ID and OTP are required.',
+      });
+    }
+
+    const ticket = await OtpTicket.findOne({ ticketId });
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: 'This OTP verification session has expired. Please lookup your report again.',
+        code: 'TICKET_EXPIRED',
+      });
+    }
+
+    if (ticket.attempts >= MAX_OTP_ATTEMPTS) {
+      await OtpTicket.deleteOne({ ticketId });
+      return res.status(403).json({
+        success: false,
+        message: 'Too many incorrect OTP attempts. Session locked for security. Please lookup your report again.',
+        code: 'TICKET_LOCKED',
+      });
+    }
+
+    // Hash entered OTP with SHA-256
+    const enteredOtp = String(otp).trim();
+    const enteredHash = crypto.createHash('sha256').update(enteredOtp).digest('hex');
+
+    if (enteredHash.toLowerCase() !== String(ticket.otp).trim().toLowerCase()) {
+      ticket.attempts += 1;
+      await ticket.save();
+
+      const remaining = MAX_OTP_ATTEMPTS - ticket.attempts;
+      return res.status(400).json({
+        success: false,
+        message: remaining > 0
+          ? `Incorrect OTP. You have ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+          : 'Incorrect OTP. You have exceeded maximum attempts.',
+        attemptsRemaining: remaining,
+        code: 'OTP_MISMATCH',
+      });
+    }
+
+    // OTP Verified! Release Report URL with &otp=<otp>
+    let finalDownloadUrl = ticket.reportUrl;
+    if (finalDownloadUrl.includes('?')) {
+      finalDownloadUrl += `&otp=${encodeURIComponent(enteredOtp)}`;
+    } else {
+      finalDownloadUrl += `?otp=${encodeURIComponent(enteredOtp)}`;
+    }
+
+    // Delete ticket immediately (one-time use)
+    await OtpTicket.deleteOne({ ticketId });
+
+    console.log(`[OTP Lockbox] ✅ OTP verified for ${ticket.mobile || ticket.regNo}. Released download URL.`);
+
+    return res.json({
+      success: true,
+      message: 'OTP verified successfully. Your verified diagnostic report is ready for download.',
+      data: {
+        reportUrl: finalDownloadUrl,
+      },
+    });
+  } catch (error) {
+    console.error('[verifyReportOtp] Error:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'OTP verification failed. Please try again.',
+    });
+  }
+};
+
+/**
+ * Legacy GET /api/reports route proxy
+ */
 export const getPatientReports = async (req, res) => {
-  try {
-    const { patientId, phone } = req.query;
-
-    if (!patientId && !phone) {
-      return res.status(400).json({ success: false, message: 'Please provide Patient ID or 10-digit Phone number' });
-    }
-
-    // 1. If Main Hospital LIS Server is configured, proxy request
-    if (isLisConfigured()) {
-      try {
-        const lisResponse = await lisClient.get('/api/v1/reports', {
-          params: { patientId, phone },
-        });
-        if (lisResponse.data) {
-          return res.json({ success: true, data: lisResponse.data, source: 'lis' });
-        }
-      } catch (lisError) {
-        console.warn('[LIS Gateway] LIS server lookup error, serving fallback data:', lisError.message);
-      }
-    }
-
-    // 2. Fallback to mock data with searched identifier
-    const mockData = generateMockReports(patientId, phone);
-    return res.json({ success: true, data: mockData, source: 'mock' });
-  } catch (error) {
-    console.error('[getPatientReports]', error);
-    return res.status(500).json({ success: false, message: 'Error retrieving patient reports' });
-  }
+  return verifyReportLookup(req, res);
 };
 
-// ─── Download Report (Proxy or Printable Document) ────────────────────────────
 export const downloadReport = async (req, res) => {
-  try {
-    const { reportId } = req.params;
-
-    // 1. If Main Hospital LIS Server is configured, stream the PDF directly
-    if (isLisConfigured()) {
-      try {
-        const lisStream = await lisClient.get(`/api/v1/reports/${reportId}/download`, {
-          responseType: 'stream',
-        });
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=Report-${reportId}.pdf`);
-        return lisStream.data.pipe(res);
-      } catch (streamError) {
-        console.warn('[LIS Gateway] LIS PDF stream failed, serving generated report view:', streamError.message);
-      }
-    }
-
-    // 2. Generate a clean, printable medical report view for browser/print
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Content-Disposition', `inline; filename=Diagnostic-Report-${reportId}.html`);
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Diagnostic Report - ${reportId} | New Life Care</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 40px; color: #1e293b; background: #fff; }
-    .header { border-bottom: 2px solid #0284c7; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .brand { font-size: 24px; font-weight: 800; color: #0369a1; }
-    .badge { background: #ecfdf5; color: #047857; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 9999px; border: 1px solid #a7f3d0; }
-    .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
-    th { background: #f1f5f9; text-align: left; padding: 10px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 600; color: #334155; }
-    td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
-    .footer { margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #64748b; text-align: center; }
-    .signature { margin-top: 30px; text-align: right; font-weight: 600; font-size: 14px; color: #0f172a; }
-    @media print { .no-print { display: none; } body { margin: 15mm; } }
-  </style>
-</head>
-<body>
-  <div class="no-print" style="margin-bottom: 20px;">
-    <button onclick="window.print()" style="background: #0284c7; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-      🖨️ Print / Save as PDF
-    </button>
-  </div>
-
-  <div class="header">
-    <div>
-      <div class="brand">NEW LIFE CARE DIAGNOSTIC CENTRE</div>
-      <div style="font-size: 13px; color: #475569; margin-top: 4px;">
-        Keranitola, Midnapore Railway Station Rd, near Mahamaya Nursing Home Lane, Midnapore - 721101
-      </div>
-      <div style="font-size: 13px; color: #0284c7; margin-top: 2px;">
-        📞 Helpline: 097335 25031 / 9647393949
-      </div>
-    </div>
-    <div style="text-align: right;">
-      <span class="badge">NABL Certified Laboratory</span>
-      <div style="font-size: 12px; color: #64748b; margin-top: 8px;">Report ID: <strong>${reportId}</strong></div>
-    </div>
-  </div>
-
-  <div class="info-box">
-    <div><strong>Patient Name:</strong> Ramesh Sen</div>
-    <div><strong>Age / Gender:</strong> 42 Yrs / Male</div>
-    <div><strong>Referred By:</strong> Consulting Physician</div>
-    <div><strong>Sample Collected:</strong> ${new Date().toLocaleDateString('en-IN')}</div>
-  </div>
-
-  <h3 style="margin-bottom: 8px; color: #0f172a;">Laboratory Investigation Report: Complete Blood Count</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Investigation Parameter</th>
-        <th>Result Value</th>
-        <th>Biological Reference Interval</th>
-        <th>Unit</th>
-        <th>Flag</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Haemoglobin</td><td><strong>14.2</strong></td><td>13.0 – 17.0</td><td>g/dL</td><td>Normal</td></tr>
-      <tr><td>Total Leucocyte Count (WBC)</td><td><strong>7,400</strong></td><td>4,000 – 11,000</td><td>/µL</td><td>Normal</td></tr>
-      <tr><td>Platelet Count</td><td><strong>2.4</strong></td><td>1.5 – 4.5</td><td>Lakh/µL</td><td>Normal</td></tr>
-      <tr><td>Neutrophils</td><td><strong>64</strong></td><td>50 – 70</td><td>%</td><td>Normal</td></tr>
-      <tr><td>Lymphocytes</td><td><strong>28</strong></td><td>20 – 40</td><td>%</td><td>Normal</td></tr>
-      <tr><td>ESR</td><td><strong>12</strong></td><td>0 – 15</td><td>mm/hr</td><td>Normal</td></tr>
-    </tbody>
-  </table>
-
-  <div class="signature">
-    <div>Digitally Authenticated By:</div>
-    <div style="margin-top: 20px; font-weight: 700; color: #0369a1;">Consultant Pathologist, MD</div>
-    <div style="font-size: 12px; color: #64748b;">Laboratory Director & Quality Assurance</div>
-  </div>
-
-  <div class="footer">
-    *** End of Test Report ***<br/>
-    This electronic laboratory report is verified by New Life Care Diagnostic Centre via dedicated LIS Gateway.
-  </div>
-</body>
-</html>`;
-
-    return res.send(html);
-  } catch (error) {
-    console.error('[downloadReport]', error);
-    return res.status(500).json({ success: false, message: 'Error generating report document' });
-  }
+  res.status(403).json({
+    success: false,
+    message: 'Direct report downloads are secured via LIS OTP verification. Please lookup your report on the Reports page.',
+  });
 };

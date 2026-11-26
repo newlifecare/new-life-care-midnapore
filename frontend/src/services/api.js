@@ -23,6 +23,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor: handle 401 session expiration cleanly
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('nlc_admin_token');
+      localStorage.removeItem('nlc_admin_user');
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname.startsWith('/admin') &&
+        window.location.pathname !== '/admin/login'
+      ) {
+        window.location.href = '/admin/login?expired=true';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 export const createBooking = async (data) => {
   const res = await api.post('/bookings', data);
@@ -34,15 +53,28 @@ export const getBookingById = async (id) => {
   return res.data;
 };
 
-// ─── Reports ─────────────────────────────────────────────────────────────────
+// ─── Reports (LIS 2-Step OTP Lockbox) ─────────────────────────────────────────
+export const verifyReport = async (params) => {
+  const res = await api.post('/reports/verify', params);
+  return res.data;
+};
+
+export const verifyReportOtp = async ({ ticketId, otp }) => {
+  const res = await api.post('/reports/verify-otp', { ticketId, otp });
+  return res.data;
+};
+
 export const getPatientReports = async (params) => {
   const res = await api.get('/reports', { params });
   return res.data;
 };
 
 // ─── Tests & Packages ─────────────────────────────────────────────────────────
-export const getTestCatalog = async (category) => {
-  const res = await api.get('/tests', { params: category ? { category } : {} });
+export const getTestCatalog = async (paramsOrCategory) => {
+  const params = typeof paramsOrCategory === 'string'
+    ? { category: paramsOrCategory }
+    : (paramsOrCategory || {});
+  const res = await api.get('/tests', { params });
   return res.data?.data || res.data || [];
 };
 

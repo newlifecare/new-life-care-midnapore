@@ -139,7 +139,11 @@ export default function AdminDashboardPage() {
       const [sData, syncData] = await Promise.all([getAdminStats(), getSyncStatus()])
       setStats(sData)
       setSyncInfo(syncData)
-    } catch (_) {}
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/admin/login?expired=true')
+      }
+    }
   }
 
   useEffect(() => {
@@ -196,7 +200,15 @@ export default function AdminDashboardPage() {
         setTests(t)
       }
     } catch (err) {
-      toast.error('Sync failed: ' + err.message)
+      const msg =
+        err.response?.data?.message ||
+        (err.response?.status === 401
+          ? 'Admin session expired or required. Please log in again.'
+          : err.message)
+      toast.error('Sync failed: ' + msg)
+      if (err.response?.status === 401) {
+        navigate('/admin/login?expired=true')
+      }
     } finally {
       setSyncing(false)
     }

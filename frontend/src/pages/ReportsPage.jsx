@@ -11,339 +11,506 @@ import {
   AlertCircle,
   Phone,
   Lock,
+  KeyRound,
+  ShieldCheck,
+  Calendar,
+  CreditCard,
+  RefreshCw,
+  ExternalLink,
+  ChevronRight,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { getPatientReports } from '../services/api'
+import { verifyReport, verifyReportOtp } from '../services/api'
 import PageTransition from '../components/PageTransition'
 import PageHero from '../components/PageHero'
 
-const inputCls = 'w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white'
+const inputCls =
+  'w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#07478f] focus:border-transparent transition-all bg-white shadow-2xs'
 
-const STATUS_COLOR = {
-  ready: 'bg-emerald-100 text-emerald-700',
-  processing: 'bg-sky-100 text-sky-700',
-  pending: 'bg-slate-100 text-slate-600',
+function todayStr() {
+  return new Date().toISOString().split('T')[0]
 }
-
-function StatusBadge({ status }) {
-  const label = status === 'ready' ? '✓ Ready' : status === 'processing' ? '⏳ Processing' : '📋 Pending'
-  return (
-    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLOR[status] || STATUS_COLOR.pending}`}>
-      {label}
-    </span>
-  )
-}
-
-// Mock reports for demo
-const MOCK_REPORTS = [
-  {
-    _id: 'r1',
-    testName: 'Complete Blood Count (CBC)',
-    reportDate: '2024-11-01',
-    status: 'ready',
-    results: [
-      { parameter: 'Haemoglobin', value: '13.5', unit: 'g/dL', refRange: '12.0–17.0', flag: 'Normal' },
-      { parameter: 'RBC Count', value: '4.8', unit: 'million/µL', refRange: '4.5–5.9', flag: 'Normal' },
-      { parameter: 'WBC Count', value: '7,200', unit: '/µL', refRange: '4,000–11,000', flag: 'Normal' },
-      { parameter: 'Platelets', value: '2.1', unit: 'lakh/µL', refRange: '1.5–4.5', flag: 'Normal' },
-      { parameter: 'Neutrophils', value: '62', unit: '%', refRange: '50–70', flag: 'Normal' },
-    ],
-  },
-  {
-    _id: 'r2',
-    testName: 'Thyroid Profile (TSH, T3, T4)',
-    reportDate: '2024-11-01',
-    status: 'ready',
-    results: [
-      { parameter: 'TSH', value: '3.2', unit: 'mIU/L', refRange: '0.4–4.0', flag: 'Normal' },
-      { parameter: 'T3 (Total)', value: '1.3', unit: 'ng/mL', refRange: '0.8–2.0', flag: 'Normal' },
-      { parameter: 'T4 (Total)', value: '7.8', unit: 'µg/dL', refRange: '5.1–14.1', flag: 'Normal' },
-    ],
-  },
-  {
-    _id: 'r3',
-    testName: 'Blood Sugar Fasting',
-    reportDate: '2024-11-02',
-    status: 'processing',
-    results: [],
-  },
-]
 
 export default function ReportsPage() {
-  const [query, setQuery] = useState({ type: 'phone', value: '' })
-  const [reports, setReports] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [searched, setSearched] = useState(false)
-  const [expandedReport, setExpandedReport] = useState(null)
+  // Search Mode: 'regNo' (Bill / Reg No) or 'mobile' (10-digit mobile)
+  const [searchMode, setSearchMode] = useState('regNo')
+  const [regNo, setRegNo] = useState('')
+  const [mobile, setMobile] = useState('')
+  const [collectionDate, setCollectionDate] = useState(todayStr())
 
-  const handleSearch = async (e) => {
+  const [loading, setLoading] = useState(false)
+  const [otpLoading, setOtpLoading] = useState(false)
+
+  // OTP Lockbox State
+  const [ticketId, setTicketId] = useState(null)
+  const [otpValue, setOtpValue] = useState('')
+  const [otpAttemptsLeft, setOtpAttemptsLeft] = useState(3)
+
+  // Result state
+  const [lookupResult, setLookupResult] = useState(null)
+  const [verifiedReportUrl, setVerifiedReportUrl] = useState(null)
+
+  // Step 1: Submit Details for Verification
+  const handleLookup = async (e) => {
     e.preventDefault()
-    if (!query.value.trim()) {
-      toast.error('Please enter a Patient ID or Phone number.')
+    setLookupResult(null)
+    setVerifiedReportUrl(null)
+    setTicketId(null)
+    setOtpValue('')
+    setOtpAttemptsLeft(3)
+
+    if (searchMode === 'regNo' && !regNo.trim()) {
+      toast.error('Please enter your Bill or Registration Number.')
       return
     }
-    if (query.type === 'phone' && !/^[6-9]\d{9}$/.test(query.value)) {
-      toast.error('Please enter a valid 10-digit mobile number.')
+
+    if (searchMode === 'mobile') {
+      const cleanMobile = mobile.trim()
+      if (!cleanMobile || cleanMobile.length < 10) {
+        toast.error('Please enter a valid 10-digit registered mobile number.')
+        return
+      }
+    }
+
+    if (!collectionDate) {
+      toast.error('Please select the sample collection date.')
       return
     }
 
     setLoading(true)
-    setSearched(false)
-    setReports([])
 
     try {
-      const res = await getPatientReports({
-        [query.type === 'phone' ? 'phone' : 'patientId']: query.value,
-      })
-      const reportList = Array.isArray(res?.data?.reports)
-        ? res.data.reports
-        : Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res?.reports)
-        ? res.reports
-        : MOCK_REPORTS
-      setReports(reportList.length > 0 ? reportList : MOCK_REPORTS)
-      toast.success(`Found ${reportList.length > 0 ? reportList.length : MOCK_REPORTS.length} report(s).`)
+      const payload = {
+        collectionDate,
+        ...(searchMode === 'regNo' ? { regNo: regNo.trim() } : { mobile: mobile.trim() }),
+      }
+
+      const res = await verifyReport(payload)
+
+      if (res?.success && res?.requiresOtp && res?.ticketId) {
+        setTicketId(res.ticketId)
+        setLookupResult({
+          status: 'REPORT_READY',
+          message: res.message || 'Your report is ready! An OTP has been sent via SMS to your registered mobile number.',
+          qrSRC: res.qrSRC || '',
+        })
+        toast.success('Report found! Please enter the OTP sent to your phone.')
+      } else {
+        setLookupResult({
+          status: res?.status || 'NOT_FOUND',
+          message: res?.message || 'No record found matching details. Please verify date and registration number.',
+          qrSRC: res?.qrSRC || '',
+        })
+      }
     } catch (err) {
-      // Show demo data
-      setReports(MOCK_REPORTS)
-      toast.success(`Found ${MOCK_REPORTS.length} report(s).`)
+      const msg = err.response?.data?.message || 'Could not connect to the diagnostic server. Please try again.'
+      setLookupResult({
+        status: 'TECH_FAIL',
+        message: msg,
+      })
+      toast.error(msg)
     } finally {
       setLoading(false)
-      setSearched(true)
     }
   }
 
-  const handleDownload = (report) => {
-    toast.success(`Downloading ${report.testName} report...`)
-    // In production: window.open(`/api/reports/${report._id}/download`, '_blank')
+  // Step 2: Submit OTP to Unlock Report URL
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    if (!otpValue.trim()) {
+      toast.error('Please enter the verification OTP.')
+      return
+    }
+
+    setOtpLoading(true)
+
+    try {
+      const res = await verifyReportOtp({
+        ticketId,
+        otp: otpValue.trim(),
+      })
+
+      if (res?.success && res?.data?.reportUrl) {
+        setVerifiedReportUrl(res.data.reportUrl)
+        toast.success('OTP verified successfully! Download link ready.')
+        // Open PDF in new tab automatically
+        window.open(res.data.reportUrl, '_blank')
+      } else {
+        toast.error(res?.message || 'OTP verification failed.')
+      }
+    } catch (err) {
+      const remaining = err.response?.data?.attemptsRemaining
+      if (remaining !== undefined) {
+        setOtpAttemptsLeft(remaining)
+      }
+      const msg = err.response?.data?.message || 'Invalid OTP. Please check the code sent to your phone.'
+      toast.error(msg)
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
+  const resetSearch = () => {
+    setLookupResult(null)
+    setVerifiedReportUrl(null)
+    setTicketId(null)
+    setOtpValue('')
   }
 
   return (
     <PageTransition>
       <Helmet>
-        <title>View Reports | New Life Care Diagnostic Centre Midnapore</title>
+        <title>Download Diagnostic Reports | New Life Care Diagnostic Centre</title>
         <meta
           name="description"
-          content="Access your diagnostic reports online at New Life Care Diagnostic Centre Midnapore. Search by patient ID or phone number."
+          content="Download verified NABL laboratory diagnostic reports online from New Life Care Diagnostic Centre in Midnapore using Bill No. or registered mobile number with secure OTP verification."
         />
       </Helmet>
 
       <PageHero
-        title="View Your Reports"
-        subtitle="Access your diagnostic reports securely using your Patient ID or registered mobile number."
+        badge="LIS Patient Portal"
+        title="Download Your Diagnostic Reports"
+        subtitle="Secure 2-step OTP verified access to your clinical pathology, biochemistry, and imaging reports."
         breadcrumb={[{ label: 'Reports' }]}
       />
 
-      <section className="py-16 bg-gradient-to-b from-transparent via-[#ebf5fe]/60 to-transparent">
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Search card */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-sky-100 p-3 rounded-xl">
-                <Lock size={20} className="text-sky-600" />
+      <section className="py-14 bg-gradient-to-b from-[#ebf5fe]/40 via-white to-[#ebf5fe]/60 min-h-[75vh]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          
+          {/* Official Quality Assurance Bar */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm mb-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#07478f] border border-blue-200 flex items-center justify-center shrink-0">
+                <ShieldCheck size={20} />
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 font-nunito">Secure Report Access</h2>
-                <p className="text-slate-500 text-sm">Reports are fetched securely from our diagnostic system</p>
+                <p className="text-xs font-black uppercase tracking-wider text-[#d91d24]">
+                  Official LIS Gateway
+                </p>
+                <p className="text-slate-900 font-extrabold text-xs sm:text-sm">
+                  New Life Care Diagnostic Centre • NABL Accredited & ISO 9001:2015
+                </p>
               </div>
             </div>
+            <img
+              src="/images/accreditations-strip.jpg"
+              alt="Certifications"
+              className="h-8 object-contain hidden sm:block"
+            />
+          </div>
 
-            <form onSubmit={handleSearch} className="space-y-4">
-              {/* Search type toggle */}
-              <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
-                {[
-                  { key: 'phone', label: '📱 Phone Number' },
-                  { key: 'id', label: '🔖 Patient ID' },
-                ].map((opt) => (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    onClick={() => setQuery({ type: opt.key, value: '' })}
-                    className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all ${
-                      query.type === opt.key
-                        ? 'bg-white text-sky-600 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+          {/* ── Search Form Card ── */}
+          <div className="bg-white rounded-3xl border-2 border-slate-200/80 shadow-xl p-6 sm:p-8 mb-8 relative overflow-hidden">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#07478f] to-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-900/20">
+                  <Lock size={18} />
+                </div>
+                <div>
+                  <h2 className="font-extrabold text-base sm:text-lg text-slate-900 font-nunito">
+                    Secure Patient Report Lookup
+                  </h2>
+                  <p className="text-slate-500 text-xs">
+                    Search via your Registration/Bill number or 10-digit mobile number
+                  </p>
+                </div>
               </div>
 
-              <div className="flex gap-3">
-                <div className="relative flex-1">
-                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={query.type === 'phone' ? 'tel' : 'text'}
-                    value={query.value}
-                    onChange={(e) => setQuery((q) => ({ ...q, value: e.target.value }))}
-                    placeholder={
-                      query.type === 'phone'
-                        ? 'Enter your 10-digit mobile number'
-                        : 'Enter your Patient ID (e.g. NLC-12345)'
-                    }
-                    maxLength={query.type === 'phone' ? 10 : 20}
-                    className={`${inputCls} pl-10`}
-                  />
+              {lookupResult && (
+                <button
+                  onClick={resetSearch}
+                  className="text-xs font-bold text-slate-600 hover:text-[#d91d24] flex items-center gap-1 cursor-pointer"
+                >
+                  <RefreshCw size={12} />
+                  <span>New Search</span>
+                </button>
+              )}
+            </div>
+
+            <form onSubmit={handleLookup} className="space-y-5">
+              {/* Search Mode Toggle Tabs */}
+              <div className="flex p-1 bg-slate-100 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchMode('regNo')
+                    resetSearch()
+                  }}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    searchMode === 'regNo'
+                      ? 'bg-white text-[#07478f] shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  🧾 By Bill / Registration No.
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchMode('mobile')
+                    resetSearch()
+                  }}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                    searchMode === 'mobile'
+                      ? 'bg-white text-[#07478f] shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  📱 By Registered Mobile
+                </button>
+              </div>
+
+              {/* Input Fields Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Search Identifier */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                    {searchMode === 'regNo' ? 'Registration / Bill Number' : 'Registered Mobile Number'}{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  {searchMode === 'regNo' ? (
+                    <input
+                      type="text"
+                      value={regNo}
+                      onChange={(e) => setRegNo(e.target.value)}
+                      placeholder="e.g. LC202611001 or bill number"
+                      className={inputCls}
+                      required
+                    />
+                  ) : (
+                    <input
+                      type="tel"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      className={inputCls}
+                      required
+                    />
+                  )}
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    {searchMode === 'regNo' ? 'Printed on your receipt/slip' : 'Number given during sample collection'}
+                  </span>
                 </div>
+
+                {/* Collection Date */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                    Sample Collection Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={collectionDate}
+                      onChange={(e) => setCollectionDate(e.target.value)}
+                      className={inputCls}
+                      required
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    Format: YYYY-MM-DD
+                  </span>
+                </div>
+              </div>
+
+              {/* Search Submit Button */}
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors disabled:opacity-60 whitespace-nowrap"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#07478f] via-blue-700 to-[#07478f] hover:from-blue-700 hover:to-blue-800 text-white font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg shadow-blue-900/20 transition-all cursor-pointer disabled:opacity-60"
                 >
                   {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
-                  {loading ? 'Searching...' : 'Search'}
+                  <span>{loading ? 'Verifying with Lab Server...' : 'Find My Report'}</span>
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Results */}
+          {/* ── Step 2: OTP Verification Lockbox Card ── */}
           <AnimatePresence>
-            {searched && (
+            {ticketId && lookupResult?.status === 'REPORT_READY' && !verifiedReportUrl && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50/80 rounded-3xl border-2 border-blue-200 p-6 sm:p-8 shadow-xl mb-8"
               >
-                {reports.length === 0 ? (
-                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-                    <AlertCircle size={40} className="text-slate-300 mx-auto mb-4" />
-                    <h3 className="font-bold text-slate-800 text-lg mb-2">No Reports Found</h3>
-                    <p className="text-slate-500 text-sm mb-6">
-                      We couldn't find any reports for the provided information. Please check your details or contact us.
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d91d24] to-red-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-red-500/20">
+                    <KeyRound size={22} />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 mb-1">
+                      <CheckCircle2 size={13} className="text-emerald-600" />
+                      Report Ready for Download
+                    </span>
+                    <h3 className="text-lg font-black text-slate-900 font-nunito">
+                      Enter Verification OTP
+                    </h3>
+                    <p className="text-slate-600 text-xs sm:text-sm mt-0.5 leading-relaxed">
+                      {lookupResult.message}
                     </p>
-                    <a
-                      href="tel:9733525031"
-                      className="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-                    >
-                      <Phone size={16} /> Call Us: 97335 25031
-                    </a>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-sm text-slate-500 font-medium">{reports.length} report(s) found</p>
-                    {reports.map((report) => (
-                      <motion.div
-                        key={report._id}
-                        layout
-                        className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
-                      >
-                        {/* Report header */}
-                        <div
-                          className="p-5 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
-                          onClick={() => setExpandedReport(expandedReport === report._id ? null : report._id)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="bg-sky-100 p-2.5 rounded-xl">
-                              <FileText size={18} className="text-sky-600" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-800">{report.testName}</p>
-                              <p className="text-slate-400 text-xs mt-0.5">
-                                {report.reportDate
-                                  ? new Date(report.reportDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                                  : 'Date pending'}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <StatusBadge status={report.status} />
-                            {report.status === 'ready' && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleDownload(report) }}
-                                className="flex items-center gap-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 text-xs font-semibold px-3 py-2 rounded-lg transition-colors"
-                              >
-                                <Download size={14} /> Download PDF
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                </div>
 
-                        {/* Expanded results */}
-                        <AnimatePresence>
-                          {expandedReport === report._id && report.status === 'ready' && report.results?.length > 0 && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.25 }}
-                              className="border-t border-slate-100 overflow-hidden"
-                            >
-                              <div className="p-5">
-                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Test Results</p>
-                                <div className="overflow-x-auto">
-                                  <table className="w-full text-sm">
-                                    <thead>
-                                      <tr className="bg-slate-50 rounded-xl">
-                                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 rounded-l-xl">Parameter</th>
-                                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Value</th>
-                                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Unit</th>
-                                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Reference Range</th>
-                                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 rounded-r-xl">Status</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {report.results.map((row, i) => (
-                                        <tr key={i} className="border-b border-slate-50 last:border-0">
-                                          <td className="px-4 py-3 font-medium text-slate-800">{row.parameter}</td>
-                                          <td className="px-4 py-3 font-bold text-sky-700">{row.value}</td>
-                                          <td className="px-4 py-3 text-slate-500">{row.unit}</td>
-                                          <td className="px-4 py-3 text-slate-500">{row.refRange}</td>
-                                          <td className="px-4 py-3">
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                              row.flag === 'Normal' || row.flag === 'Normal Range'
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : row.flag === 'High'
-                                                ? 'bg-red-100 text-red-700'
-                                                : row.flag === 'Low'
-                                                ? 'bg-cyan-100 text-cyan-700'
-                                                : 'bg-slate-100 text-slate-600'
-                                            }`}>
-                                              {row.flag}
-                                            </span>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-
-                          {expandedReport === report._id && report.status === 'processing' && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="border-t border-slate-100 p-5"
-                            >
-                              <div className="flex items-center gap-3 text-sky-600">
-                                <Clock size={18} />
-                                <p className="text-sm">Your report is being processed. Please check back in a few hours.</p>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    ))}
+                <form onSubmit={handleVerifyOtp} className="mt-5 space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                      SMS Verification Code (OTP) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={otpValue}
+                      onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      placeholder="Enter 4 or 6-digit OTP"
+                      className="w-full border-2 border-blue-300 rounded-xl px-4 py-3 text-lg font-mono font-bold tracking-widest text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#07478f]"
+                      autoFocus
+                      required
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Attempts remaining: <span className="font-bold text-red-600">{otpAttemptsLeft}</span>
+                    </span>
                   </div>
-                )}
+
+                  <button
+                    type="submit"
+                    disabled={otpLoading}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#d91d24] to-red-600 hover:from-red-600 hover:to-red-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl shadow-lg shadow-red-600/25 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {otpLoading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                    <span>{otpLoading ? 'Verifying OTP...' : 'Verify OTP & Download Report'}</span>
+                  </button>
+                </form>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Info note */}
-          <div className="mt-8 bg-sky-50 border border-sky-200 rounded-2xl p-5 flex items-start gap-3">
-            <AlertCircle size={18} className="text-sky-600 shrink-0 mt-0.5" />
-            <p className="text-sky-700 text-sm">
-              <span className="font-semibold">Report Privacy Notice: </span>
-              Reports are fetched securely from our diagnostic system. Only the registered patient can access their reports using the registered phone number. For assistance, call{' '}
-              <a href="tel:9733525031" className="font-bold underline">97335 25031</a>.
-            </p>
+          {/* ── Step 3: Verified Download Success Card ── */}
+          <AnimatePresence>
+            {verifiedReportUrl && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-emerald-50 border-2 border-emerald-300 rounded-3xl p-6 sm:p-8 shadow-xl mb-8 text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-500/25">
+                  <CheckCircle2 size={30} />
+                </div>
+                <h3 className="text-xl font-black text-slate-900 font-nunito">
+                  Diagnostic Report Verified & Ready
+                </h3>
+                <p className="text-slate-600 text-sm mt-1 mb-6 max-w-md mx-auto">
+                  Your official NABL-accredited laboratory PDF report is ready for download.
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <a
+                    href={verifiedReportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/30 transition-all"
+                  >
+                    <Download size={18} />
+                    <span>Download PDF Report Now</span>
+                    <ExternalLink size={14} />
+                  </a>
+
+                  <button
+                    onClick={resetSearch}
+                    className="px-5 py-3.5 rounded-2xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm transition-all cursor-pointer"
+                  >
+                    Search Another Report
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Status Feedback (Pending, Payment, Not Found) ── */}
+          <AnimatePresence>
+            {lookupResult && lookupResult.status !== 'REPORT_READY' && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`rounded-3xl border-2 p-6 sm:p-8 shadow-md mb-8 ${
+                  lookupResult.status === 'REPORT_PENDING'
+                    ? 'bg-amber-50/80 border-amber-200'
+                    : lookupResult.status === 'PAYMENT_PENDING'
+                    ? 'bg-orange-50/80 border-orange-200'
+                    : 'bg-slate-50 border-slate-200'
+                }`}
+              >
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                      lookupResult.status === 'REPORT_PENDING'
+                        ? 'bg-amber-500 text-white'
+                        : lookupResult.status === 'PAYMENT_PENDING'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-slate-400 text-white'
+                    }`}
+                  >
+                    {lookupResult.status === 'REPORT_PENDING' ? (
+                      <Clock size={20} />
+                    ) : lookupResult.status === 'PAYMENT_PENDING' ? (
+                      <CreditCard size={20} />
+                    ) : (
+                      <AlertCircle size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base">
+                      {lookupResult.status === 'REPORT_PENDING'
+                        ? 'Report Under Clinical Evaluation'
+                        : lookupResult.status === 'PAYMENT_PENDING'
+                        ? 'Billing / Payment Notice'
+                        : 'No Matching Report Found'}
+                    </h3>
+                    <p className="text-slate-600 text-xs sm:text-sm mt-1 leading-relaxed">
+                      {lookupResult.message}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+                  <span>Need immediate assistance?</span>
+                  <a
+                    href="tel:9733525031"
+                    className="inline-flex items-center gap-1.5 font-bold text-[#d91d24] hover:underline"
+                  >
+                    <Phone size={13} />
+                    <span>Call Lab Reception: 97335 25031</span>
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Helpdesk Notice */}
+          <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200 p-5 text-xs text-slate-600 leading-relaxed flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>
+              <p className="font-bold text-slate-900">Hospital LIS Helpdesk Support</p>
+              <p className="text-slate-500 mt-0.5">
+                Physical collection counter open 7:00 AM – 8:00 PM at Keranitola, Paschim Medinipur.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <a
+                href="tel:9733525031"
+                className="font-bold text-[#07478f] hover:underline flex items-center gap-1"
+              >
+                <Phone size={13} /> 9733525031
+              </a>
+              <span className="text-slate-300">/</span>
+              <a
+                href="tel:9647393949"
+                className="font-bold text-[#07478f] hover:underline flex items-center gap-1"
+              >
+                <Phone size={13} /> 9647393949
+              </a>
+            </div>
           </div>
         </div>
       </section>
